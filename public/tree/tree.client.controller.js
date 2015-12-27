@@ -51,26 +51,62 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state) {
         var layer3 = [];
         var groupArr = _.groupBy(newArr, function(num){
             return num.vers_num;
-        })
-
+        });
+        var middleLayer = [];
         console.log(groupArr);
-        for(var i = 0; i<version.length;i++){
-            for(var j = 0; j <groupArr[version[i]].length;j++){
-                var edition = groupArr[version[i]][j].edition;
-                if(groupArr[version[i]][j].edition==""){
-                    edition = "N/A";
-                }
-               layer3.push({
-                   name : edition
-               });
-                if(layer3.length>30){
 
+
+        for(var i = 0; i<version.length;i++){
+            var newGroupArr = _.chunk(groupArr[version[i]],30);
+
+            var name ;
+            for(var j = 0; j < newGroupArr.length;j++){
+                if(newGroupArr[j].length <30 || j==newGroupArr[j].length-1){
+                    name = 1+(30*j)+"-"+((30*j)+newGroupArr[j].length);
+                }else{
+                    name = 1+(30*j)+"-"+(30+(30*j));
                 }
-        }
-            //console.log(layer3);
-            root.children[i].children = layer3;
-            layer3 = [];
+               for(var m = 0; m < newGroupArr[j].length;m++){
+                   if( newGroupArr[j][m].edition ==""){
+                       newGroupArr[j][m].name = "N/A";
+                   }else{
+                       newGroupArr[j][m].name = newGroupArr[j][m].edition;
+                   }
+                   newGroupArr[j][m].children = [{
+                       name : newGroupArr[j][m].vname
+                   }]
+               }
+                middleLayer.push({
+                    name : name,
+                    children : newGroupArr[j]
+                })
             }
+            root.children[i].children = middleLayer;
+            middleLayer=[];
+            newGroupArr = [];
+            }
+
+            console.log(root);
+
+            /*
+            var m = 0;*/
+            /*for(var k = 0; k <groupArr[version[i]].length;k++) {
+                var edition = groupArr[version[i]][k].edition;
+                 if(groupArr[version[i]][k].edition==""){
+                 edition = "N/A";
+                 }
+                 layer3.push({
+                 name : edition
+                 });
+                 if(layer3.length>30){
+                     middleLayer[m].children = layer3;
+                     layer3=[];
+                     m++;
+                 }
+                 }*/
+                // console.log(middleLayer);
+            //root.children[i].children = middleLayer;
+
 
 
     var m = [20, 120, 20, 120],
@@ -210,6 +246,21 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state) {
             d.children = d._children;
             d._children = null;
         }
+        if (d.parent) {
+            d.parent.children.forEach(function(element) {
+                if (d !== element) {
+                    collapse(element);
+                }
+            });
+        }
     }
+
+        function collapse(d) {
+            if (d.children) {
+                d._children = d.children;
+                d._children.forEach(collapse);
+                d.children = null;
+            }
+        }
     });
 });

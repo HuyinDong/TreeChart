@@ -20,6 +20,7 @@
     "angular-ui-grid":"3.0.5",
     "font-awesome-animation":"0.0.7",
     "d3":"3.5.6",
+    "lodash":"3.10.1",
     "underscore":"1.8.3"
   }
 }
