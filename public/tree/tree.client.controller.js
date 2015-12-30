@@ -4,26 +4,30 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state) {
     /**
      * Created by dongyin on 12/25/15.
      */
-
+    $scope.loading = true;
     var object = $rootScope.object;
+    console.log(object);
     var newData = [];
     var version = [];
     var temp,newArr;
     var layer2;
     var root = {
-        name : object.selected
+        name : object.selectedVendor
     };
 
     /****************************
      **********layer3************
      ****************************/
+    if(object.filter == ""){
+        object.filter = 'null';
+    }
 
 
-
-    $http.get('/data/vuln/' + object.vendor+'/'+object.selected).then(function (data) {
+    $http.get('/data/vuln/' + object.selectedVendor+'/'+object.selected+'/'+object.filter).then(function (data) {
+        $scope.loading = false;
         newData = data.data;
+        console.log(newData);
         newArr = _.sortBy(newData, function(num){ return num.vers_num; });
-
         //generate layer 2
         temp = newArr[0].vers_num;
         version.push(temp);
@@ -85,29 +89,6 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state) {
             middleLayer=[];
             newGroupArr = [];
             }
-
-            console.log(root);
-
-            /*
-            var m = 0;*/
-            /*for(var k = 0; k <groupArr[version[i]].length;k++) {
-                var edition = groupArr[version[i]][k].edition;
-                 if(groupArr[version[i]][k].edition==""){
-                 edition = "N/A";
-                 }
-                 layer3.push({
-                 name : edition
-                 });
-                 if(layer3.length>30){
-                     middleLayer[m].children = layer3;
-                     layer3=[];
-                     m++;
-                 }
-                 }*/
-                // console.log(middleLayer);
-            //root.children[i].children = middleLayer;
-
-
 
     var m = [20, 120, 20, 120],
         w = 1280 - m[1] - m[3],

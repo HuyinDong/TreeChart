@@ -10,9 +10,10 @@ module.exports = function(app){
     app.get('/data/tools',data.getTools);
     app.get('/data/virus',data.getVirus);
     app.get('/data/vuln',data.getVuln);
-
+    app.get('/data/vendor/:ven',data.getVendor);
     app.get('/data/vuln/:vendor',data.selectOne);
-    app.get('/data/vuln/:vendor/:product',data.selectProducts);
+    app.get('/data/vuln/version/:vendor/:product',data.getVulnVersionNum);
+    app.get('/data/vuln/:vendor/:product/:version',data.selectProducts);
 
 
 
