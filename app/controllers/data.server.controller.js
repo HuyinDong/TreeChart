@@ -2,7 +2,7 @@
  * Created by dongyin on 8/22/15.
  */
 
-    console.log("controller");
+
 var connection = require('../../config/mysql');
 var mysql = require('mysql');
 exports.getExploit = function(req,res,next){
@@ -26,8 +26,6 @@ exports.getVendor = function(req,res,next){
 }
 
 exports.getVuln = function(req,res,next){
-    console.log("getVuln");
-    console.log(req.params);
     call(connection,'select * from vuln_soft',req,res,next);
 };
 
@@ -53,7 +51,6 @@ exports.selectProducts = function(req,res,next){
     }
     var sql = 'select * from vuln_soft where vendor = ? and prod_name = ? and `vers_num` LIKE ?';
     var inserts = [req.params["vendor"],req.params["product"],ver];
-    console.log(inserts);
     sql = mysql.format(sql,inserts);
     call(connection,sql,req,res,next);
 };

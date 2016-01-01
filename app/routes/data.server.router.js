@@ -1,7 +1,6 @@
 
 var data = require('../controllers/data.server.controller');
 module.exports = function(app){
-    console.log("route");
     app.get('/', function (req, res) {
         res.render('index', {});
     });
