@@ -28,11 +28,8 @@ header.controller("headerController",function($scope,$http,$rootScope,$state,$md
 
 
     function getVulnInfo() {
-        console.log($scope.object.selectedVendor);
         $http.get('/data/vuln/' + $scope.object.selectedVendor).then(function (data) {
-            console.log(data.data);
             $scope.object.products = data.data;
-
         });
 
     };
@@ -63,7 +60,13 @@ header.controller("headerController",function($scope,$http,$rootScope,$state,$md
 
     function getVersionNum(){
         $http.get('/data/vuln/version/' + $scope.object.selectedVendor+'/'+$scope.object.selected).then(function (data) {
-            $scope.object.versionNum = data.data;
+            var arr = _.forEach(data.data,function(d){
+                if(d.vers_num ==""){
+                    d.vers_num = "empty";
+                }
+            })
+
+            $scope.object.versionNum = arr;
         });
 
 

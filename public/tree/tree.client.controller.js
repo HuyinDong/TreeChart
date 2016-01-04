@@ -6,7 +6,9 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
      */
     $scope.loading = true;
     var object = $rootScope.object;
-    console.log(object);
+   if(object.filter == "empty"){
+       object.filter = "";
+   }
     var newData = [];
     var version = [];
     var temp,newArr;
@@ -27,7 +29,11 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
             $scope.loading = false;
             newData = data.data;
             console.log(newData);
-            newArr = _.sortBy(newData, function (num) {
+            root.children = _.map(newData,function(d){
+                d.name = d.vers_num;
+                    return d;
+            });
+           /* newArr = _.sortBy(newData, function (num) {
                 return num.vers_num;
             });
             //generate layer 2
@@ -60,9 +66,31 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
             });
             var middleLayer = [];
             console.log(groupArr);
-
-
+            var newArr = [];
             for (var i = 0; i < version.length; i++) {
+                    newArr.push(_.groupBy(groupArr[version[i]],function(d){
+                            return d.edition;
+                })
+            );
+            }
+            console.log(newArr);
+            console.log("root",root);
+            var layer3;
+            for(var i = 0;i < newArr.length;i++){
+                console.log(i);
+                console.log(newArr[i]);
+                for(var j =0; j < newArr[i].length;j++){
+                    console.log(j);
+                    layer3.push({
+                        name : Object.keys(newArr[i][j]),
+                        children : newArr[i][Object.keys(newArr[i][j])]
+                    });
+
+                }
+            }
+            console.log(layer3);
+
+            /*for (var i = 0; i < version.length; i++) {
                 var newGroupArr = _.chunk(groupArr[version[i]], 30);
 
                 var name;
@@ -90,7 +118,7 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                 root.children[i].children = middleLayer;
                 middleLayer = [];
                 newGroupArr = [];
-            }
+            }*/
 
             var m = [20, 120, 20, 120],
                 w = 1280 - m[1] - m[3],
@@ -133,6 +161,7 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
             update(root);
 
             function update(source) {
+                console.log("update");
                 var duration = d3.event && d3.event.altKey ? 5000 : 500;
 
                 // Compute the new tree layout.
@@ -157,7 +186,6 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                     })
                     .on("click", function (d) {
                         toggle(d);
-                        update(d);
                     });
 
                 nodeEnter.append("svg:circle")
@@ -263,6 +291,30 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                         }
                     });
                 }
+                var path = "/"+d.name;
+                for(var i = 1; i < d.depth; i++){
+                    path = path + "/" + d.parent.name;
+                }
+                var newPath = path.split("/");
+                newPath.shift();
+                path = "";
+                for(var i = 0; i<newPath.length;i++){
+                    path+="/"+newPath[newPath.length-1-i];
+                }
+                console.log("path",path);
+                $http.get('/data/vuln1/' + object.selectedVendor + '/' + object.selected + path)
+                     .then(function(data){
+                                console.log(data.data);
+                         var children = _.map(data.data,function(newData){
+                                return {
+                                    name : newData[Object.keys(newData)[0]]
+                                       }
+                         })
+                         d.children = children;
+                         update(d);
+                });
+                console.log("root",root);
+
             }
 
             function collapse(d) {
