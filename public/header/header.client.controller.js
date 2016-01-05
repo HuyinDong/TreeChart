@@ -7,6 +7,7 @@ header.controller("headerController",function($scope,$http,$rootScope,$state,$md
     $scope.object = {};
     $scope.selectedVendor = '';
     $scope.object.filter = '';
+    $scope.object.products = '';
     var times = 0;
     var excuted = false;
     $(document).on('keypress', '#vendor', getVendorInfo);
@@ -28,6 +29,13 @@ header.controller("headerController",function($scope,$http,$rootScope,$state,$md
 
 
     function getVulnInfo() {
+        if( $scope.object.products != ''){
+            $scope.object.products = '';
+        }
+        if( $scope.object.filter != ''){
+            $scope.object.filter = '';
+        }
+
         $http.get('/data/vuln/' + $scope.object.selectedVendor).then(function (data) {
             $scope.object.products = data.data;
         });
@@ -40,7 +48,7 @@ header.controller("headerController",function($scope,$http,$rootScope,$state,$md
             showAlert();
         } else {
             $rootScope.object = $scope.object;
-                $state.go("tree");
+                $state.go("tree",{}, { reload: true });
 
 
         }

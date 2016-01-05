@@ -35,15 +35,18 @@ exports.getVulnVersionNum = function(req,res,next){
 };
 
 exports.getEdition = function(req,res,next){
+    console.log("edition");
+    var edtion = req.params['exactVersion'] == "empty"?"":req.params['exactVersion'];
     call(connection,"select distinct(edition) from vuln_soft where `vendor` ='"+req.params['vendor']+"' and " +
         "`prod_name` = '"+req.params['product']+"' and "+"`vers_num` = '"+
-        req.params['exactVersion']+"'",req,res,next);
+        edtion+"'",req,res,next);
 };
 
 exports.getCveNum = function(req,res,next){
+    var edtion = req.params['exactVersion'] == "empty"?"":req.params['exactVersion'];
     call(connection,"select vname from vuln_soft where `vendor` ='"+req.params['vendor']+"' and " +
         "`prod_name` = '"+req.params['product']+"' and "+"`vers_num` = '"+
-        req.params['exactVersion']+"' and "+"`edition` ='"+req.params['cveNum']+"'",req,res,next);
+        edtion+"' and "+"`edition` ='"+req.params['cveNum']+"'",req,res,next);
 };
 
 exports.selectOne = function(req,res,next){
@@ -57,7 +60,7 @@ exports.selectOne = function(req,res,next){
 exports.selectProducts = function(req,res,next){
     console.log("product");
     var ver;
-    if(req.params['version'] == 'null'){
+    if(req.params['version'] == 'empty'){
         ver = "%%"
     }else{
         ver = "%"+req.params['version']+"%";
