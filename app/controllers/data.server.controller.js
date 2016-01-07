@@ -85,4 +85,5 @@ function call(connection,query,req,res,next){
     connection.query(query,function(err,rows){
         res.json(rows);
     });
+    connection.end();
 }
