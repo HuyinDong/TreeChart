@@ -46,13 +46,16 @@ header.controller("headerController",function($scope,$http,$rootScope,$state,$md
     $scope.getTreeChart = function() {
         if ($scope.object.selectedVendor == null) {
             showAlert();
-        } else {
+        } else if($scope.object.type == 'tree'){
             $rootScope.object = $scope.object;
                 $state.go("tree",{}, { reload: true });
-
+        }else if($scope.object.type == 'table'){
+            $rootScope.object = $scope.object;
+            $state.go("table",{}, { reload: true });
+        }else{
 
         }
-    }
+    };
 
     function showAlert() {
         var alert = $mdDialog.alert({
