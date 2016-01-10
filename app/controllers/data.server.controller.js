@@ -82,8 +82,14 @@ exports.selectAll = function(req,res,next){
 };
 
 function call(connection,query,req,res,next){
-    connection.query(query,function(err,rows){
-        res.json(rows);
-    });
-    connection.end();
+        connection.query(query, function (err, rows) {
+            if(err){
+                res.json(err);
+            }else {
+                res.json(rows);
+            }
+            //connection.end();
+        });
+
+
 }

@@ -4,6 +4,9 @@ module.exports = function(app){
     app.get('/', function (req, res) {
         res.render('index', {});
     });
+    app.get('/test', function (req, res) {
+        res.render('test', {});
+    });
     app.get('/data/exploit',data.getExploit);
     app.get('/data/refs', data.getRefs);
     app.get('/data/tools',data.getTools);

@@ -20,7 +20,7 @@ module.exports = function(){
         realm: "Private area",
         file: "htpasswd"
     });
-    app.use(auth.connect(basic));
+    //app.use(auth.connect(basic));
     data(app);
 
 

@@ -35,8 +35,8 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
             });
             d3.select("svg").remove();
             var m = [20, 120, 20, 120],
-                w = 1280 - m[1] - m[3],
-                h = 800 - m[0] - m[2],
+                w = 1920 - m[1] - m[3],
+                h = 1400 - m[0] - m[2],
                 i = 0;
 
             var tree = d3.layout.tree()
