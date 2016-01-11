@@ -1,0 +1,239 @@
+
+    <!DOCTYPE html>
+    <html lang="en">
+            <head>
+            <meta charset="utf-8">
+
+            <title>Collapsible Tree Example</title>
+
+    <style>
+
+    .node circle {
+        fill: #fff;
+        stroke: steelblue;
+        stroke-width: 3px;
+    }
+
+    .node text { font: 12px sans-serif; }
+
+    .link {
+        fill: none;
+        stroke: #ccc;
+        stroke-width: 2px;
+    }
+
+    </style>
+
+    </head>
+
+    <body>
+    <div id = "container" style = "margin:0 auto;"></div>
+        <!-- load the d3.js library -->
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+
+<script>
+
+    var treeData = [
+        {
+            "name": "Top Level",
+            "parent": "null",
+            "children": [
+                {
+                    "name": "Level 2: A",
+                    "parent": "Top Level",
+                    "children": [
+                        {
+                            "name": "Son of A",
+                            "parent": "Level 2: A"
+                        },
+                        {
+                            "name": "Daughter of A",
+                            "parent": "Level 2: A"
+                        }
+                    ]
+                },
+                {
+                    "name": "Level 2: B",
+                    "parent": "Top Level"
+                }
+            ]
+        }
+    ];
+
+
+
+    // ************** Generate the tree diagram	 *****************
+    var margin = {top: 20, right: 120, bottom: 20, left: 120},
+            width = 960 - margin.right - margin.left,
+            height = 500 - margin.top - margin.bottom;
+
+    var i = 0;
+
+    var data = [5,10,15,20,25,30,35,40,45,50];
+
+
+
+
+
+    var root = treeData[0];
+    console.log(root);
+
+    drawTree(root);
+    root.children.forEach(toggleAll);
+
+
+
+    function toggleAll(d) {
+        if (d.children) {
+            d.children.forEach(toggleAll);
+            toggle(d);
+        }
+    }
+
+
+
+    function toggle(d){
+        console.log(d.children);
+        if (d.children) {
+            console.log("children");
+            d._children = d.children;
+            d.children = null;
+        } else {
+            console.log("_children");
+            d.children = d._children;
+            d._children = null;
+        }
+        console.log(d);
+        if (d.parent) {
+            d.parent.children.forEach(function (element) {
+                if (d !== element) {
+                    collapse(element);
+                }
+            });
+        }
+        drawTree(root);
+    }
+
+    function collapse(d) {
+        if (d.children) {
+            d._children = d.children;
+            d._children.forEach(collapse);
+            d.children = null;
+        }
+    }
+function drawTree(d) {
+    var tree = d3.layout.tree()
+            .size([height, width]);
+
+    var nodes = tree.nodes(root);
+
+    var diagonal = d3.svg.diagonal()
+            .projection(function(d) { return [d.y, d.x]; });
+
+    nodes.forEach(function (d) {
+        d.y = d.depth * 180;
+    });
+
+    var links = tree.links(nodes);
+    var svg = d3.select("#container").append("svg")
+            .attr("width", 900)
+            .attr("height", 900)
+
+    var g = svg.append("svg:g")
+            .attr("transform", "translate(" + 120 + "," + 20 + ")");
+
+
+    var nodes = g.selectAll("g")
+            .data(nodes)
+            .enter()
+            .append("g")
+            .on("click", function (d) {
+                toggle(d);
+            });
+    ;
+
+    nodes.append("circle")
+            .attr("stroke", "blue")
+            .attr("fill", "#ccc")
+            .attr("cx", function (d) {
+                return d.y;
+            })
+            .attr("cy", function (d) {
+                return d.x;
+            })
+            .attr("r", 8);
+
+    nodes.append("text")
+            .attr("x", function (d) {
+                return d.y + 20;
+            })
+            .attr("y", function (d) {
+                return d.x;
+            })
+            .text(function (d) {
+                return d.name;
+            });
+
+    // Transition nodes to their new position.
+
+
+    nodes.select("circle")
+            .attr("r", 4.5)
+            .style("fill", function (d) {
+                return d._children ? "lightsteelblue" : "#fff";
+            });
+
+    nodes.select("text")
+            .style("fill-opacity", 1);
+
+    var nodeExit = nodes.exit()
+            .attr("transform", function (d) {
+                return "translate(" + source.y + "," + source.x + ")";
+            })
+            .remove();
+
+    nodeExit.select("circle")
+            .attr("r", 1e-6);
+
+    nodeExit.select("text")
+            .style("fill-opacity", 1e-6);
+
+
+    // Update the links…
+    var link = g.selectAll("path.link")
+            .data(links);
+    console.log(link);
+    // Enter any new links at the parent's previous position.
+    link.enter().insert("g:path", "g")
+            .attr("class", "link")
+            .attr("d", function (d) {
+                var o = {x: d.source.x, y: d.source.y};
+
+                return diagonal({source: o, target: o});
+            })
+            .transition()
+            .attr("d", diagonal);
+
+    // Transition links to their new position.
+    link.transition()
+
+            .attr("d", diagonal);
+
+    // Transition exiting nodes to the parent's new position.
+    link.exit().transition()
+
+            .attr("d", function (d) {
+                var o = {x: d.source.x, y: d.source.y};
+                return diagonal({source: o, target: o});
+            })
+            .remove();
+}
+
+
+
+
+
+</script>
+
+</body>
+</html>

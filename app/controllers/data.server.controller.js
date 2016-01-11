@@ -35,15 +35,18 @@ exports.getVulnVersionNum = function(req,res,next){
 };
 
 exports.getEdition = function(req,res,next){
+    console.log("edition");
+    var edtion = req.params['exactVersion'] == "empty"?"":req.params['exactVersion'];
     call(connection,"select distinct(edition) from vuln_soft where `vendor` ='"+req.params['vendor']+"' and " +
         "`prod_name` = '"+req.params['product']+"' and "+"`vers_num` = '"+
-        req.params['exactVersion']+"'",req,res,next);
+        edtion+"'",req,res,next);
 };
 
 exports.getCveNum = function(req,res,next){
+    var edtion = req.params['exactVersion'] == "empty"?"":req.params['exactVersion'];
     call(connection,"select vname from vuln_soft where `vendor` ='"+req.params['vendor']+"' and " +
         "`prod_name` = '"+req.params['product']+"' and "+"`vers_num` = '"+
-        req.params['exactVersion']+"' and "+"`edition` ='"+req.params['cveNum']+"'",req,res,next);
+        edtion+"' and "+"`edition` ='"+req.params['cveNum']+"'",req,res,next);
 };
 
 exports.selectOne = function(req,res,next){
@@ -57,7 +60,7 @@ exports.selectOne = function(req,res,next){
 exports.selectProducts = function(req,res,next){
     console.log("product");
     var ver;
-    if(req.params['version'] == 'null'){
+    if(req.params['version'] == 'empty'){
         ver = "%%"
     }else{
         ver = "%"+req.params['version']+"%";
@@ -69,7 +72,19 @@ exports.selectProducts = function(req,res,next){
 };
 
 
-
+exports.getTableProducts = function(req,res,next){
+    console.log("tableProducts");
+    var ver;
+    if(req.params['version'] == 'empty'){
+        ver = "%%"
+    }else{
+        ver = "%"+req.params['version']+"%";
+    }
+    var sql = 'select * from vuln_soft where vendor = ? and prod_name = ? and `vers_num` LIKE ?';
+    var inserts = [req.params["vendor"],req.params["product"],ver];
+    sql = mysql.format(sql,inserts);
+    call(connection,sql,req,res,next);
+}
 
 exports.selectAll = function(req,res,next){
     var sql = 'select * from ??';
@@ -79,7 +94,14 @@ exports.selectAll = function(req,res,next){
 };
 
 function call(connection,query,req,res,next){
-    connection.query(query,function(err,rows){
-        res.json(rows);
-    });
+        connection.query(query, function (err, rows) {
+            if(err){
+                res.json(err);
+            }else {
+                res.json(rows);
+            }
+            //connection.end();
+        });
+
+
 }

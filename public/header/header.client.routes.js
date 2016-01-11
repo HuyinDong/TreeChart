@@ -10,5 +10,10 @@ header.config(['$stateProvider', '$urlRouterProvider',
                 templateUrl: './tree/tree.client.view.html',
                 controller : 'treeController'
             })
+            .state('table',{
+                url : '/table',
+                templateUrl : './table/table.client.view.html',
+                controller : 'tableController'
+            })
     }
 ]);

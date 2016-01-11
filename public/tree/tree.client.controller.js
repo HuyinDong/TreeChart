@@ -10,121 +10,34 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
        object.filter = "";
    }
     var newData = [];
-    var version = [];
-    var temp,newArr;
-    var layer2;
     var root = {
-        name : object.selectedVendor
+        name : object.selectedVendor+"/"+object.selected
     };
 
     /****************************
      **********layer3************
      ****************************/
     if(object.filter == ""){
-        object.filter = 'null';
+        object.filter = 'empty';
     }
 
     $timeout(function() {
         $http.get('/data/vuln/' + object.selectedVendor + '/' + object.selected + '/' + object.filter).then(function (data) {
             $scope.loading = false;
             newData = data.data;
-            console.log(newData);
             root.children = _.map(newData,function(d){
-                d.name = d.vers_num;
+                if(d.vers_num == ""){
+                    d.name = "empty";
+                }else{
+                    d.name = d.vers_num;
+                }
                     return d;
             });
-           /* newArr = _.sortBy(newData, function (num) {
-                return num.vers_num;
-            });
-            //generate layer 2
-            temp = newArr[0].vers_num;
-            version.push(temp);
-            for (var i = 1; i < newArr.length; i++) {
-                if (temp == newArr[i].vers_num) {
-                    continue;
-                } else {
-                    version.push(newArr[i].vers_num);
-                    temp = newArr[i].vers_num;
-                }
-            }
-            layer2 = _.map(version, function (num) {
-                if (num == "") {
-                    num = " "
-                }
-                return {
-                    name: num,
-                    children: null
-                }
-            })
-            root.children = layer2;
-
-
-            //generate layer 3
-            var layer3 = [];
-            var groupArr = _.groupBy(newArr, function (num) {
-                return num.vers_num;
-            });
-            var middleLayer = [];
-            console.log(groupArr);
-            var newArr = [];
-            for (var i = 0; i < version.length; i++) {
-                    newArr.push(_.groupBy(groupArr[version[i]],function(d){
-                            return d.edition;
-                })
-            );
-            }
-            console.log(newArr);
-            console.log("root",root);
-            var layer3;
-            for(var i = 0;i < newArr.length;i++){
-                console.log(i);
-                console.log(newArr[i]);
-                for(var j =0; j < newArr[i].length;j++){
-                    console.log(j);
-                    layer3.push({
-                        name : Object.keys(newArr[i][j]),
-                        children : newArr[i][Object.keys(newArr[i][j])]
-                    });
-
-                }
-            }
-            console.log(layer3);
-
-            /*for (var i = 0; i < version.length; i++) {
-                var newGroupArr = _.chunk(groupArr[version[i]], 30);
-
-                var name;
-                for (var j = 0; j < newGroupArr.length; j++) {
-                    if (newGroupArr[j].length < 30 || j == newGroupArr[j].length - 1) {
-                        name = 1 + (30 * j) + "-" + ((30 * j) + newGroupArr[j].length);
-                    } else {
-                        name = 1 + (30 * j) + "-" + (30 + (30 * j));
-                    }
-                    for (var m = 0; m < newGroupArr[j].length; m++) {
-                        if (newGroupArr[j][m].edition == "") {
-                            newGroupArr[j][m].name = "N/A";
-                        } else {
-                            newGroupArr[j][m].name = newGroupArr[j][m].edition;
-                        }
-                        newGroupArr[j][m].children = [{
-                            name: newGroupArr[j][m].vname
-                        }]
-                    }
-                    middleLayer.push({
-                        name: name,
-                        children: newGroupArr[j]
-                    })
-                }
-                root.children[i].children = middleLayer;
-                middleLayer = [];
-                newGroupArr = [];
-            }*/
-
+            d3.select("svg").remove();
             var m = [20, 120, 20, 120],
-                w = 1280 - m[1] - m[3],
-                h = 800 - m[0] - m[2],
+                w = 1920 - m[1] - m[3],
+                h = 1400 - m[0] - m[2],
                 i = 0;
-
 
             var tree = d3.layout.tree()
                 .size([h, w]);
@@ -140,14 +53,12 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                 .append("svg:g")
                 .attr("transform", "translate(" + m[3] + "," + m[0] + ")");
 
-
             root.x0 = h / 2;
             root.y0 = 0;
 
             function toggleAll(d) {
                 if (d.children) {
                     d.children.forEach(toggleAll);
-
                     toggle(d);
                 }
             }
@@ -161,7 +72,7 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
             update(root);
 
             function update(source) {
-                console.log("update");
+
                 var duration = d3.event && d3.event.altKey ? 5000 : 500;
 
                 // Compute the new tree layout.
@@ -291,29 +202,60 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                         }
                     });
                 }
-                var path = "/"+d.name;
-                for(var i = 1; i < d.depth; i++){
-                    path = path + "/" + d.parent.name;
-                }
-                var newPath = path.split("/");
-                newPath.shift();
-                path = "";
-                for(var i = 0; i<newPath.length;i++){
-                    path+="/"+newPath[newPath.length-1-i];
-                }
-                console.log("path",path);
-                $http.get('/data/vuln1/' + object.selectedVendor + '/' + object.selected + path)
-                     .then(function(data){
-                                console.log(data.data);
-                         var children = _.map(data.data,function(newData){
-                                return {
-                                    name : newData[Object.keys(newData)[0]]
-                                       }
-                         })
-                         d.children = children;
-                         update(d);
-                });
-                console.log("root",root);
+
+                    var path = "/" + d.name;
+                    for (var i = 1; i < d.depth; i++) {
+                        path = path + "/" + d.parent.name;
+                    }
+                    var newPath = path.split("/");
+                    newPath.shift();
+                    path = "";
+                    for (var i = 0; i < newPath.length; i++) {
+                        path += "/" + newPath[newPath.length - 1 - i];
+                    }
+
+                    $http.get('/data/vuln1/' + object.selectedVendor + '/' + object.selected + path)
+                        .then(function (data) {
+                            console.log("data",data);
+                            var chunk;
+                            if(data.data.length > 30){
+                                chunk = _.chunk(data.data,30);
+                                var layer3 = [];
+                                var middleLayer  = [];
+                                var cve = [];
+                                for(var i = 0; i < chunk.length;i++){
+                                    middleLayer.push({
+                                        name : i*30+1+"-"+(i+1)*30,
+                                        children : null,
+                                        _children : null
+                                    });
+                                    for(var j = 0; j < chunk[i].length;j++){
+                                        cve.push({
+                                            name : chunk[i][j][Object.keys(chunk[i][j])],
+                                            children : null
+                                        });
+                                    }
+                                    middleLayer[i].children = cve;
+                                    cve = [];
+                                    d.children = middleLayer;
+                                }
+                            }else{
+                                chunk = data.data;
+                                var children = _.map(chunk, function (newData) {
+                                    var name ;
+                                    if(newData[Object.keys(newData)[0]] == ""){
+                                        name = "empty";
+                                    }else{
+                                        name = newData[Object.keys(newData)[0]];
+                                    }
+                                    return {
+                                        name: name
+                                    }
+                                });
+                                d.children = children;
+                            }
+                            update(d);
+                        });
 
             }
 

@@ -7,7 +7,8 @@ var mainApplicationModule = angular.module('mainApplicationModule',
         'lumx',
         'ui.router',
         'header',
-        'tree'
+        'tree',
+        'table'
 
     ]);
 
