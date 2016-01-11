@@ -15,5 +15,10 @@ header.config(['$stateProvider', '$urlRouterProvider',
                 templateUrl : './table/table.client.view.html',
                 controller : 'tableController'
             })
+            .state('detail',{
+                url : 'detail/:cve',
+                templateUrl : './detail/detail.client.view.html',
+                controller : 'detailController'
+            })
     }
 ]);

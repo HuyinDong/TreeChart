@@ -4,12 +4,11 @@
 
 var mainApplicationModule = angular.module('mainApplicationModule',
     [
-        'lumx',
         'ui.router',
         'header',
         'tree',
-        'table'
-
+        'table',
+        'detail'
     ]);
 
 angular.element(document).ready(function(){
