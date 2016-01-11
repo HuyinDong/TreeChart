@@ -1,7 +1,7 @@
 /**
  * Created by dongyin on 1/10/16.
  */
-table.controller("tableController",['$rootScope','$scope', '$http', '$interval', 'uiGridTreeViewConstants', function ($rootScope,$scope, $http, $timeout, uiGridTreeViewConstants ) {
+table.controller("tableController",['$rootScope','$scope', '$http', '$interval', 'uiGridGroupingConstants', function ($rootScope,$scope, $http, $timeout,$interval, uiGridGroupingConstants ) {
 
     $scope.loading = true;
     var object = $rootScope.object;
@@ -20,122 +20,92 @@ table.controller("tableController",['$rootScope','$scope', '$http', '$interval',
         object.filter = 'empty';
     }
 
-    $scope.nodeLoaded = false;
-    $scope.gridOptions = {
-        enableSorting: true,
-        enableFiltering: true,
-        showTreeExpandNoChildren: true,
-        /*columnDefs: [
-         { name: 'Product Name', width: '15%' },
-         { name: 'Version Number', width: '15%' },
-         { name: 'Edition', width: '15%' },
-         { name: 'CVE Name', width: '15%' }
-         ],*/
 
-        columnDefs: [
-            { name: 'version', width: '15%' },
-            { name: 'edition', width: '15%' },
-            { name: 'cve', width: '15%' },
-            { name: 'product', width: '15%' },
-            { name: 'vendor', width: '15%' }
-        ],
-
-        onRegisterApi: function( gridApi ) {
-            $scope.gridApi = gridApi;
-            $scope.gridApi.treeBase.on.rowExpanded($scope, function(row) {
-                if( !$scope.nodeLoaded ) {
-                    $http.get('data/vuln/table/' + object.selectedVendor + '/' + object.selected + '/' + row.entity.version).then(function (items) {
-                        console.log(items);
-                        var children = _.forEach(items.data,function(d){
-                            d.$$treeLevel = 1;
-                            d.version = d.vers_num;
-
-                        });
-                        $scope.gridOptions.data.splice(51,0,children);
-                        $scope.nodeLoaded = true;
-                    });
-                }
-                console.log(row);
-            });
-        }
-    };
-    $http.get('/data/vuln/' + object.selectedVendor + '/' + object.selected + '/' + object.filter).then(function (data) {
-        $scope.loading = false;
-        var gridData = [];
-        _.forEach(data.data,function(item){
-            if(item.vers_num == ""){
-                item.vers_num = "empty"
+        $scope.gridOptions = {
+            enableFiltering: true,
+            treeRowHeaderAlwaysVisible: false,
+            enableColumnMenus: false,
+            enableMinHeightCheck:true,
+            columnDefs: [
+                { name: 'vendor', width: '20%', displayName: 'Vendor'},
+                { name: 'prod_name',  width: '20%' ,displayName: 'Product'},
+                { name: 'vname', width: '20%' , displayName: 'CVE'},
+                { name: 'edition', width: '20%', displayName: 'Edition'},
+                { name: 'vers_num',  displayName: 'Version',grouping: { groupPriority: 0 }, sort: { priority: 0, direction: 'desc' }, width: '15%',
+                    cellTemplate: '<div><div ng-if="!col.grouping || col.grouping.groupPriority === undefined || col.grouping.groupPriority === null || ( row.groupHeader && col.grouping.groupPriority === row.treeLevel )" class="ui-grid-cell-contents" title="TOOLTIP">{{COL_FIELD CUSTOM_FILTERS}}</div></div>' },
+            ],
+            onRegisterApi: function( gridApi ) {
+                $scope.gridApi = gridApi;
             }
-            gridData.push({
-                version : item.vers_num,
-                $$treeLevel : 0
-            })
-        });
-        $scope.gridOptions.data = gridData;
+        };
+
+        $http.get('data/vuln/table/' + object.selectedVendor + '/' + object.selected+'/'+object.filter)
+            .then(function(data) {
+                console.log(data);
+                var items = data.data;
+                $scope.gridOptions.data = items;
+
+            });
+
+        $scope.expandAll = function(){
+            $scope.gridApi.treeBase.expandAllRows();
+        };
+
+        $scope.toggleRow = function( rowNum ){
+            $scope.gridApi.treeBase.toggleRowTreeState($scope.gridApi.grid.renderContainers.body.visibleRowCache[rowNum]);
+        };
+
+        $scope.changeGrouping = function() {
+            $scope.gridApi.grouping.clearGrouping();
+            $scope.gridApi.grouping.groupColumn('age');
+            $scope.gridApi.grouping.aggregateColumn('state', uiGridGroupingConstants.aggregation.COUNT);
+        };
+
+        $scope.getAggregates = function() {
+            var aggregatesTree = [];
+            var gender;
+
+            var recursiveExtract = function( treeChildren ) {
+                return treeChildren.map( function( node ) {
+                    var newNode = {};
+                    angular.forEach(node.row.entity, function( attributeCol ) {
+                        if( typeof(attributeCol.groupVal) !== 'undefined' ) {
+                            newNode.groupVal = attributeCol.groupVal;
+                            newNode.aggVal = attributeCol.value;
+                        }
+                    });
+                    newNode.otherAggregations = node.aggregations.map( function( aggregation ) {
+                        return { colName: aggregation.col.name, value: aggregation.value, type: aggregation.type };
+                    });
+                    if( node.children ) {
+                        newNode.children = recursiveExtract( node.children );
+                    }
+                    return newNode;
+                });
+            }
+
+            aggregatesTree = recursiveExtract( $scope.gridApi.grid.treeBase.tree );
+
+            console.log(aggregatesTree);
+        };
+    }])
+    .filter('mapGender', function() {
+        var genderHash = {
+            1: 'male',
+            2: 'female'
+        };
+
+        return function(input) {
+            var result;
+            var match;
+            if (!input){
+                return '';
+            } else if (result = genderHash[input]) {
+                return result;
+            } else if ( ( match = input.match(/(.+)( \(\d+\))/) ) && ( result = genderHash[match[1]] ) ) {
+                return result + match[2];
+            } else {
+                return input;
+            }
+        };
     });
-
-   /* var data = [];
-    data[0] = {
-        name:'a',
-        $$treeLevel : 0,
-        state: 'collapsed',
-        children : [
-            {
-                name : 'b',
-                $$treeLevel : 1,
-                gender : 'female',
-                age : 30,
-                company : 'b',
-                state1 : 'MD',
-            },
-            {
-                name : 'c',
-                $$treeLevel : 1,
-                gender : 'female',
-                age : 30,
-                company : 'c',
-                state1 : 'MD',
-            },
-        ]
-    };
-
-    data[1] = {
-        name:'d',
-        $$treeLevel : 0,
-        state: 'expanded',
-        children : [
-            {
-                name : 'e',
-                $$treeLevel : 1,
-                gender : 'female',
-                age : 30,
-                company : 'e',
-                state1 : 'MD',
-            },
-            {
-                name : 'f',
-                $$treeLevel : 1,
-                gender : 'female',
-                age : 30,
-                company : 'f',
-                state1 : 'MD',
-            },
-        ]
-    };
-
-    $scope.gridOptions.data = data;
-    console.log($scope.gridOptions.data);
-    */
-    $scope.expandAll = function(){
-        $scope.gridApi.treeBase.expandAllRows();
-    };
-
-    $scope.toggleRow = function( rowNum ){
-        $scope.gridApi.treeBase.toggleRowTreeState($scope.gridApi.grid.renderContainers.body.visibleRowCache[rowNum]);
-    };
-
-    $scope.toggleExpandNoChildren = function(){
-        $scope.gridOptions.showTreeExpandNoChildren = !$scope.gridOptions.showTreeExpandNoChildren;
-        $scope.gridApi.grid.refresh();
-    };
-}]);

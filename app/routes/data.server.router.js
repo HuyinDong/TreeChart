@@ -15,10 +15,9 @@ module.exports = function(app){
     app.get('/data/vendor/:ven',data.getVendor);
     app.get('/data/vuln/:vendor',data.selectOne);
     app.get('/data/vuln/version/:vendor/:product',data.getVulnVersionNum);
-    app.get('/data/vuln/:vendor/:product/:version',data.selectProducts);
+
     app.get('/data/vuln1/:vendor/:product/:exactVersion',data.getEdition);
     app.get('/data/vuln1/:vendor/:product/:exactVersion/:cveNum',data.getCveNum);
-
     app.get('/data/vuln/table/:vendor/:product/:version',data.getTableProducts);
 
 };

@@ -74,16 +74,17 @@ exports.selectProducts = function(req,res,next){
 
 exports.getTableProducts = function(req,res,next){
     console.log("tableProducts");
-    var ver = req.params['version'];
+    var ver;
     if(req.params['version'] == 'empty'){
-        ver = ""
+        ver = "%%"
+    }else{
+        ver = "%"+req.params['version']+"%";
     }
-    var sql = 'select * from vuln_soft where vendor = ? and prod_name = ? and `vers_num` = ?';
+    var sql = 'select * from vuln_soft where vendor = ? and prod_name = ? and `vers_num` LIKE ?';
     var inserts = [req.params["vendor"],req.params["product"],ver];
     sql = mysql.format(sql,inserts);
     call(connection,sql,req,res,next);
 }
-
 
 exports.selectAll = function(req,res,next){
     var sql = 'select * from ??';
