@@ -1,51 +1,131 @@
 /**
  * Created by dongyin on 1/10/16.
  */
-table.controller("tableController",['$scope', '$http', '$interval', 'uiGridTreeViewConstants', function ($scope, $http, $interval, uiGridTreeViewConstants ) {
+table.controller("tableController",['$rootScope','$scope', '$http', '$interval', 'uiGridTreeViewConstants', function ($rootScope,$scope, $http, $timeout, uiGridTreeViewConstants ) {
+
+    $scope.loading = true;
+    var object = $rootScope.object;
+    if(object.filter == "empty"){
+        object.filter = "";
+    }
+    var newData = [];
+    var root = {
+        name : object.selectedVendor+"/"+object.selected
+    };
+
+    /****************************
+     **********layer3************
+     ****************************/
+    if(object.filter == ""){
+        object.filter = 'empty';
+    }
+
+    $scope.nodeLoaded = false;
     $scope.gridOptions = {
         enableSorting: true,
         enableFiltering: true,
         showTreeExpandNoChildren: true,
+        /*columnDefs: [
+         { name: 'Product Name', width: '15%' },
+         { name: 'Version Number', width: '15%' },
+         { name: 'Edition', width: '15%' },
+         { name: 'CVE Name', width: '15%' }
+         ],*/
+
         columnDefs: [
-            { name: 'name', width: '30%' },
-            { name: 'gender', width: '20%' },
-            { name: 'age', width: '20%' },
-            { name: 'company', width: '25%' },
-            { name: 'state', width: '35%' },
-            { name: 'balance', width: '25%', cellFilter: 'currency' }
+            { name: 'version', width: '15%' },
+            { name: 'edition', width: '15%' },
+            { name: 'cve', width: '15%' },
+            { name: 'product', width: '15%' },
+            { name: 'vendor', width: '15%' }
         ],
+
         onRegisterApi: function( gridApi ) {
             $scope.gridApi = gridApi;
             $scope.gridApi.treeBase.on.rowExpanded($scope, function(row) {
-                if( row.entity.$$hashKey === $scope.gridOptions.data[50].$$hashKey && !$scope.nodeLoaded ) {
-                    $interval(function() {
-                        $scope.gridOptions.data.splice(51,0,
-                            {name: 'Dynamic 1', gender: 'female', age: 53, company: 'Griddable grids', balance: 38000, $$treeLevel: 1},
-                            {name: 'Dynamic 2', gender: 'male', age: 18, company: 'Griddable grids', balance: 29000, $$treeLevel: 1}
-                        );
+                if( !$scope.nodeLoaded ) {
+                    $http.get('data/vuln/table/' + object.selectedVendor + '/' + object.selected + '/' + row.entity.version).then(function (items) {
+                        console.log(items);
+                        var children = _.forEach(items.data,function(d){
+                            d.$$treeLevel = 1;
+                            d.version = d.vers_num;
+
+                        });
+                        $scope.gridOptions.data.splice(51,0,children);
                         $scope.nodeLoaded = true;
-                    }, 2000, 1);
+                    });
                 }
+                console.log(row);
             });
         }
     };
-    $http.get('https://cdn.rawgit.com/angular-ui/ui-grid.info/gh-pages/data/500_complex.json')
-        .success(function(data) {
-            for ( var i = 0; i < data.length; i++ ){
-                data[i].state = data[i].address.state;
-                data[i].balance = Number( data[i].balance.slice(1).replace(/,/,'') );
+    $http.get('/data/vuln/' + object.selectedVendor + '/' + object.selected + '/' + object.filter).then(function (data) {
+        $scope.loading = false;
+        var gridData = [];
+        _.forEach(data.data,function(item){
+            if(item.vers_num == ""){
+                item.vers_num = "empty"
             }
-            data[0].$$treeLevel = 0;
-            data[1].$$treeLevel = 1;
-            data[10].$$treeLevel = 1;
-            data[11].$$treeLevel = 1;
-            data[20].$$treeLevel = 0;
-            data[25].$$treeLevel = 1;
-            data[50].$$treeLevel = 0;
-            data[51].$$treeLevel = 0;
-            $scope.gridOptions.data = data;
+            gridData.push({
+                version : item.vers_num,
+                $$treeLevel : 0
+            })
         });
+        $scope.gridOptions.data = gridData;
+    });
 
+   /* var data = [];
+    data[0] = {
+        name:'a',
+        $$treeLevel : 0,
+        state: 'collapsed',
+        children : [
+            {
+                name : 'b',
+                $$treeLevel : 1,
+                gender : 'female',
+                age : 30,
+                company : 'b',
+                state1 : 'MD',
+            },
+            {
+                name : 'c',
+                $$treeLevel : 1,
+                gender : 'female',
+                age : 30,
+                company : 'c',
+                state1 : 'MD',
+            },
+        ]
+    };
+
+    data[1] = {
+        name:'d',
+        $$treeLevel : 0,
+        state: 'expanded',
+        children : [
+            {
+                name : 'e',
+                $$treeLevel : 1,
+                gender : 'female',
+                age : 30,
+                company : 'e',
+                state1 : 'MD',
+            },
+            {
+                name : 'f',
+                $$treeLevel : 1,
+                gender : 'female',
+                age : 30,
+                company : 'f',
+                state1 : 'MD',
+            },
+        ]
+    };
+
+    $scope.gridOptions.data = data;
+    console.log($scope.gridOptions.data);
+    */
     $scope.expandAll = function(){
         $scope.gridApi.treeBase.expandAllRows();
     };

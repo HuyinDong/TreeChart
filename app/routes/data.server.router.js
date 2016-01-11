@@ -19,4 +19,6 @@ module.exports = function(app){
     app.get('/data/vuln1/:vendor/:product/:exactVersion',data.getEdition);
     app.get('/data/vuln1/:vendor/:product/:exactVersion/:cveNum',data.getCveNum);
 
+    app.get('/data/vuln/table/:vendor/:product/:version',data.getTableProducts);
+
 };
