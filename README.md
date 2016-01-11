@@ -1,6 +1,6 @@
-# donghuyin.com-new
+# Smart exploits
 
-Using NodeJs and angularJS to rewrite the website. More organized codes and more fancy ui.
+Smart Expoits
 
 1. npm install
 2. bower install

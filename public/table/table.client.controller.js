@@ -21,6 +21,8 @@ table.controller("tableController",['$rootScope','$scope', '$http','$timeout',
             enableColumnMenus: false,
             enableMinHeightCheck:true,
             enableRowSelection:true,
+            enableSelectAll: false,
+            multiSelect:false,
             columnDefs: [
                 { name: 'vendor', width: '20%', displayName: 'Vendor'},
                 { name: 'prod_name',  width: '20%' ,displayName: 'Product'},
