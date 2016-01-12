@@ -47,7 +47,7 @@ table.controller("tableController",['$rootScope','$scope', '$http','$timeout',
         $scope.height = "height : "+($(window).height()-82-62-12)+"px";
 
         $scope.getDetail = function(){
-            
+
         };
 
         $timeout(function(){

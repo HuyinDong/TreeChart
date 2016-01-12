@@ -95,12 +95,19 @@ exports.selectAll = function(req,res,next){
 
 function call(connection,query,req,res,next){
         connection.query(query, function (err, rows) {
-            if(err){
-                res.json(err);
+           /* if(err){
+                throw err;
             }else {
                 res.json(rows);
+            }*/
+            //connection.release();
+            try{
+                res.json(rows);
+            }catch(err){
+                console.log(err.code);
+                console.log(err.fatal);
+                res.json(err);
             }
-            //connection.end();
         });
 
 
