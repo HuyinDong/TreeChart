@@ -21,6 +21,8 @@
     "font-awesome-animation":"0.0.7",
     "d3":"3.5.6",
     "lodash":"3.10.1",
-    "font-awesome":"~4.5.0"
+    "font-awesome":"~4.5.0",
+    "highlightjs":"8.7.0",
+    "SyntaxHighlighter":"3.0.9"
   }
 }

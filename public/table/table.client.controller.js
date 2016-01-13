@@ -1,9 +1,9 @@
 /**
  * Created by dongyin on 1/10/16.
  */
-table.controller("tableController",['$rootScope','$scope', '$http','$timeout',
-    function ($rootScope,$scope, $http,$timeout) {
-
+table.controller("tableController",['$rootScope','$scope', '$http','$timeout','$mdDialog',
+    function ($rootScope,$scope, $http,$timeout,$mdDialog) {
+    var cve ;
     $scope.loading = true;
         $scope.selected = false;
         var length ;
@@ -12,7 +12,6 @@ table.controller("tableController",['$rootScope','$scope', '$http','$timeout',
     if(object.filter == "empty"){
         object.filter = "";
     }
-
     if(object.filter == ""){
         object.filter = 'empty';
     }
@@ -38,6 +37,8 @@ table.controller("tableController",['$rootScope','$scope', '$http','$timeout',
                     console.log(msg);
                     if(row.isSelected){
                         $scope.selected = true;
+                        cve = row.entity.vname;
+
                     }else{
                         $scope.selected = false;
                     }
@@ -48,6 +49,19 @@ table.controller("tableController",['$rootScope','$scope', '$http','$timeout',
 
         $scope.getDetail = function(){
 
+            $mdDialog.show({
+                templateUrl:'./detail/detail.client.view.html',
+                locals: {
+                    items: cve
+                },
+                controller: 'detailController',
+                onComplete: afterShowAnimation,
+                clickOutsideToClose : true
+            });
+
+            function afterShowAnimation(scope, element, options) {
+                SyntaxHighlighter.all();
+            }
         };
 
         $timeout(function(){
@@ -61,7 +75,5 @@ table.controller("tableController",['$rootScope','$scope', '$http','$timeout',
 
                 });
         },1500);
-
-
 
     }]);

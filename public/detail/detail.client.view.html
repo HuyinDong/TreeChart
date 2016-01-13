@@ -1,0 +1,13 @@
+<md-dialog style = 'width : 800px; height : 900px'>
+    <md-toolbar class="md-theme-light">
+        <h4 class="md-toolbar-tools">
+            <span>Exploits of {{cve}}:</span>
+        </h4>
+    </md-toolbar>
+    <md-content id = 'inner'>
+        <pre class="brush: c;gutter:true;auto-links: false, smart-tabs: true;;" style = "padding :15px">
+            {{content}}
+        </pre>
+</md-content>
+    <md-button ng-click = 'closeDialog()' class = 'md-primary'>Close</md-button>
+</md-dialog>
