@@ -15,24 +15,48 @@ table.controller("tableController",['$rootScope','$scope', '$http','$timeout','$
     if(object.filter == ""){
         object.filter = 'empty';
     }
+        var cellTemplate = '<div id={{row.entity.name}}-{{col.colDef.name}} ' +
+            'class="ui-grid-cell-contents"> {{COL_FIELD CUSTOM_FILTERS}}</div>';
         $scope.gridOptions = {
             enableFiltering: true,
             treeRowHeaderAlwaysVisible: false,
             enableColumnMenus: false,
             enableMinHeightCheck:true,
-            enableRowSelection:true,
+            enableFullRowSelection:true,
             enableSelectAll: false,
+            enableRowHeaderSelection:false,
             multiSelect:false,
             columnDefs: [
-                { name: 'edition', width: '33%', displayName: 'Edition'},
-                { name: 'vname', width: '33%' , displayName: 'CVE'},
+                { field: 'edition', width: '33%', displayName : 'Edtion',allowCellFocus : false},
+                { field: 'vname', width: '33%' , displayName : 'CVE',cellTemplate: cellTemplate},
 
-                { name: 'vers_num',  displayName: 'Version',grouping: { groupPriority: 0 }, sort: { priority: 0, direction: 'desc' }, width: '29%',
-                    cellTemplate: '<div><div ng-if="!col.grouping || col.grouping.groupPriority === undefined || col.grouping.groupPriority === null || ( row.groupHeader && col.grouping.groupPriority === row.treeLevel )" class="ui-grid-cell-contents" title="TOOLTIP">{{COL_FIELD CUSTOM_FILTERS}}</div></div>' },
+                { field: 'vers_num',  grouping: { groupPriority: 0 },allowCellFocus : false,
+                    sort: { priority: 0, direction: 'desc' }, width: '29%',displayName : 'Version Number',}
             ],
             onRegisterApi: function( gridApi ) {
                 $scope.gridApi = gridApi;
-                gridApi.selection.on.rowSelectionChanged($scope,function(row){
+                console.log(gridApi);
+                gridApi.cellNav.on.navigate($scope,function(newRowCol, oldRowCol) {
+                    var cve = $scope.gridApi.grid.getCellValue(newRowCol.row,newRowCol.col);
+                    console.log(cve);
+                   if(cve) {
+                       $mdDialog.show({
+                           templateUrl: './detail/detail.client.view.html',
+                           locals: {
+                               items: cve
+                           },
+                           controller: 'detailController',
+                           onComplete: afterShowAnimation,
+                           clickOutsideToClose: true
+                       });
+
+                       function afterShowAnimation(scope, element, options) {
+                           SyntaxHighlighter.all();
+                       }
+                   }
+                });
+
+               /* getFocusedCell($scope,function(row){
                     var msg = 'row selected ' + row.isSelected;
                     console.log(msg);
                     if(row.isSelected){
@@ -42,26 +66,19 @@ table.controller("tableController",['$rootScope','$scope', '$http','$timeout','$
                     }else{
                         $scope.selected = false;
                     }
-                });
+                });*/
             }
         };
+
+        /*
+         gridApi.grid.cellNav.clearFocus();
+         gridApi.grid.cellNav.lastRowCol = null;
+         */
         $scope.height = "height : "+($(window).height()-82-62-12)+"px";
 
         $scope.getDetail = function(){
 
-            $mdDialog.show({
-                templateUrl:'./detail/detail.client.view.html',
-                locals: {
-                    items: cve
-                },
-                controller: 'detailController',
-                onComplete: afterShowAnimation,
-                clickOutsideToClose : true
-            });
 
-            function afterShowAnimation(scope, element, options) {
-                SyntaxHighlighter.all();
-            }
         };
 
         $timeout(function(){

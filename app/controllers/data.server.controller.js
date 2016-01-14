@@ -2,10 +2,11 @@
  * Created by dongyin on 8/22/15.
  */
 
-
+var lodash = require('lodash');
 var connection = require('../../config/mysql');
 var mysql = require('mysql');
 var fs = require('fs');
+var async = require('async');
 exports.getExploit = function(req,res,next){
     call(connection,'select * from exploitdb', req,res,next);
 };
@@ -96,34 +97,44 @@ exports.selectAll = function(req,res,next){
 
 exports.getSmartExploits = function(req,res,next){
     var cve = "%"+req.params["cve"]+"%";
-    var sql = 'select fid from smartexploits where source = ? and ereferences LIKE ?';
+    var sql = 'select * from smartexploits where source = ? and ereferences LIKE ?';
     var inserts = ["exploit-db.com",cve];
     sql = mysql.format(sql,inserts);
     connection.query(sql, function (err, rows) {
         console.log("rows",rows );
         if(rows != ""){
-            var fid = rows[0].fid;
-            fs.readFile('./public/data/exploitfiles/'+fid, 'utf8',function(err,content){
-                if (err) {
-                    return console.log("err",err);
-                }
-                res.json(content.toString());
+            var paths = [];
+              /*  for(var i = 0; i<rows.length;i++){
+                    paths.push('./public/data/exploitfiles/'+rows[i].fid);
+                }*/
+            paths.push('./public/data/exploitfiles/38352');
+            paths.push('./public/data/exploitfiles/38196');
+            var results = [];
+            var object = {
+                rows : rows
+            };
+                paths.forEach(function(path,index){
+                fs.readFile(path,function(err,content){
+                    console.log(content.toString());
+                    results.push(content.toString());
+                    if(index === paths.length - 1){
+                        object.results  = results;
+                        res.json(object);
+                    }
+                });
             });
-        }else{
-            res.json({
-                msg : "null"
-            });
-        }
-    });
 
 
-    fs.readFile('/etc/hosts', 'utf8', function (err,data) {
-        if (err) {
-            return console.log(err);
-        }
-        console.log(data);
-    });
+            }
+                else
+            {
+                res.json({
+                    msg: "null"
+                });
+            }
+});
 }
+
 
 function call(connection,query,req,res,next){
         connection.query(query, function (err, rows) {

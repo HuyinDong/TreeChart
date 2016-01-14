@@ -1,18 +1,28 @@
 /**
  * Created by dongyin on 1/11/16.
  */
-detail.controller('detailController',['$scope','items','$mdDialog','$http','$sce',
-    function($scope,items,$mdDialog,$http,$sce){
+detail.controller('detailController',['$scope','items','$mdDialog','$http','$sce','$timeout',
+    function($scope,items,$mdDialog,$http,$sce,$timeout){
+        $scope.loading = true;
     $scope.cve = items;
     $(function(){
         SyntaxHighlighter.all();
     });
+    $scope.newData = [];
+    $scope.contents = [];
 
-    $scope.content = "";
+
     $http.get('data/smartexploits/CVE-2014-8322').then(function(data){
         console.log(data);
+        $scope.info = data.data.rows;
 
-        $scope.content = $sce.trustAsHtml(data.data);
+        $timeout(function(){
+        $scope.loading = false;
+        for(var i = 0 ;i < data.data.results.length;i++){
+            $scope.newData.push($sce.trustAsHtml(data.data.results[i]));
+        }
+
+    },1500);
     });
     $scope.closeDialog = function(){
         $mdDialog.cancel();

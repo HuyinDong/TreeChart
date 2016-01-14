@@ -8,5 +8,6 @@ var table = angular.module('table',
         'ui.grid.grouping',
         'ui.grid.selection',
         'ngMaterial',
-        'ui.grid.autoResize'
+        'ui.grid.autoResize',
+            'ui.grid.cellNav'
     ]);
