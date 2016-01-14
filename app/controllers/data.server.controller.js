@@ -152,6 +152,5 @@ function call(connection,query,req,res,next){
                 res.json(err);
             }
         });
-
-
 }
+

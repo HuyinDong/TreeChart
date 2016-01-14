@@ -37,6 +37,7 @@ table.controller("tableController",['$rootScope','$scope', '$http','$timeout','$
                 $scope.gridApi = gridApi;
                 console.log(gridApi);
                 gridApi.cellNav.on.navigate($scope,function(newRowCol, oldRowCol) {
+
                     var cve = $scope.gridApi.grid.getCellValue(newRowCol.row,newRowCol.col);
                     console.log(cve);
                    if(cve) {
@@ -46,13 +47,8 @@ table.controller("tableController",['$rootScope','$scope', '$http','$timeout','$
                                items: cve
                            },
                            controller: 'detailController',
-                           onComplete: afterShowAnimation,
                            clickOutsideToClose: true
                        });
-
-                       function afterShowAnimation(scope, element, options) {
-                           SyntaxHighlighter.all();
-                       }
                    }
                 });
 
