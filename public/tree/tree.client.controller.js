@@ -1,4 +1,4 @@
-tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeout) {
+tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeout,$mdDialog) {
 
 
     /**
@@ -195,11 +195,11 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
             var depthThreeTimes= 0;
             var depthThreeChildren;
             function toggle(d) {
+                console.log(d);
                 if(d.name == "Load More" && d.depth == 2){
                     console.log(depthTwoArr);
                     console.log(depthTwoTimes);
                     var temp = _.map(depthTwoArr[depthTwoTimes], function (d) {
-                        console.log("d", d);
                         var name;
                         if(d.cvename == null)
                         {
@@ -236,7 +236,6 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                 }else if(d.name == "Load More" && d.depth == 3){
 
                     var temp = _.map(depthThreeArr[depthThreeTimes], function (d) {
-                        console.log("d", d);
                         var name;
                         if(d.cvename == null)
                         {
@@ -269,7 +268,7 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                     }
                     d.parent.children = depthThreeChildren;
                     update(d);
-                }else if(d.depth == 2 || d.depth ==3 || d.depth ==1){
+                }else if(d.depth == 2 || d.depth ==1){
                     if(d.depth == 1) {
                         depthTwoArr = [];
                         depthTwoTimes = 0;
@@ -295,12 +294,15 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                         });
                     }
                     var path = "/" + d.name;
+                    var par = d.parent;
                     for (var i = 1; i < d.depth; i++) {
-                        path = path + "/" + d.parent.name;
+                        path = path + "/" + par.name;
+                        console.log(path);
+                        par = par.parent;
                     }
                     var newPath = path.split("/");
                     newPath.shift();
-
+                    console.log(newPath);
                     path = "";
                     for (var i = 0; i < newPath.length; i++) {
                         path += "/" + newPath[newPath.length - 1 - i];
@@ -308,7 +310,6 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                     console.log(path);
                     $http.get('/data/vendor/tree/' + object.selectedVendor + '/' + object.selected + path)
                         .then(function (data) {
-                            console.log(data.data);
                             if (data.data.length > 7) {
                                 var totalArray;
                                 totalArray = _.chunk(data.data, 7);
@@ -346,29 +347,70 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                                 }else if(d.depth == 2){
                                     depthThreeArr = totalArray;
                                     depthThreeChildren = children;
+                                }else{
+
+                                }
+                                console.log(depthTwoArr);
+                                if(d.depth == 1){
+                                }else if(d.depth == 2){
                                     depthThreeChildren.push({
                                         name: "Load More"
                                     });
                                     depthThreeTimes++;
+                                }else{
+
                                 }
                             }else{
+                                var children;
                                 children = _.map(data.data, function (d) {
-
+                                    var name;
+                                    if(d.cvename == null)
+                                    {
+                                        if (d[Object.keys(d)[0]] == "") {
+                                            name = "empty";
+                                        } else {
+                                            name = d[Object.keys(d)[0]];
+                                        }
+                                        return {
+                                            name: name
+                                        }
+                                    }else{
+                                        if (d[Object.keys(d)[1]] == "") {
+                                            name = "empty";
+                                        } else {
+                                            name = d[Object.keys(d)[1]];
+                                        }
+                                        return {
+                                            name: name
+                                        }
+                                    }
                                 });
                                 if(d.depth == 1){
                                     depthTwoChildren = children;
                                 }else if(d.depth == 2){
                                     depthThreeChildren = children;
+                                }else{
+
                                 }
                             }
                             d.children = children;
                             update(d);
                         });
 
+                }else if(d.depth == 3){
+                    $mdDialog.show({
+                        templateUrl: './detail/detail.client.view.html',
+                        locals: {
+                            items: d.name
+                        },
+                        controller: 'detailController',
+                        clickOutsideToClose: true
+                    });
                 }else{
                     console.log("wrong");
                 }
             }
+
             function collapse(d) {
                 if (d.children) {
                     d._children = d.children;

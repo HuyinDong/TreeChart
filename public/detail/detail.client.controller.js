@@ -12,7 +12,7 @@ detail.controller('detailController',['$scope','items','$mdDialog','$http','$sce
     $scope.contents = [];
 
 
-    $http.get('data/smartexploits/CVE-2014-8322').then(function(data){
+    $http.get('data/smartexploits/CVE-2013-4625').then(function(data){
         console.log(data);
         $scope.info = data.data.rows;
 

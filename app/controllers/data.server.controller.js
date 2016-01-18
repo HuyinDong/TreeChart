@@ -70,7 +70,6 @@ exports.getExactProducts = function(req,res,next){
     var version = req.params['version'] == "empty"?"":req.params['version'];
     var sql = "select distinct(edition) from vendor where `vendor_name` = ? and `prod_name` = ? and `vers_num` = ?";
     var inserts = [req.params["vendor"],req.params["product"],version];
-    console.log(inserts);
     sql = mysql.format(sql,inserts);
     call(connection,sql,req,res,next);
 };
@@ -83,14 +82,12 @@ exports.getCveNum = function(req,res,next){
     var sql = "select vendor_id from vendor where vendor_name = ? and prod_name = ? and vers_num = ? and edition = ?";
     var inserts = [req.params["vendor"],req.params["product"],version,edition];
     sql = mysql.format(sql,inserts);
-    console.log(sql);
     connection.query(sql, function (err, rows) {
         console.log(rows);
         vendor_id = rows[0].vendor_id;
         sql = "select a.* from CVEs as a inner join cve_vendor b on a.cve_id = b.cve_id where b.vendor_id = ?";
         inserts = [vendor_id];
         sql = mysql.format(sql,inserts);
-        console.log(sql);
         call(connection,sql,req,res,next);
     });
     //SELECT a.* FROM `CVEs` as a inner join cve_vendor b on a.cve_id = b.cve_id WHERE b.vendor_id= 2/
@@ -119,10 +116,13 @@ exports.selectAll = function(req,res,next){
     call(connection,sql,req,res,next);
 };
 
+
+//SELECT a.* FROM `smartexploits` as a inner join cve_exploits b on a.id = b.eid WHERE b.cve= 'CVE-2013-4625'/
+
 exports.getSmartExploits = function(req,res,next){
-    var cve = "%"+req.params["cve"]+"%";
-    var sql = 'select * from smartexploits where source = ? and ereferences LIKE ?';
-    var inserts = ["exploit-db.com",cve];
+    var cve = req.params["cve"];
+    var sql = "SELECT a.* FROM `smartexploits` as a inner join cve_exploits b on a.id = b.eid WHERE b.cve= ?";
+    var inserts = [cve];
     sql = mysql.format(sql,inserts);
     connection.query(sql, function (err, rows) {
         if(rows != ""){
