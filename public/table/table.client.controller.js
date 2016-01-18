@@ -78,7 +78,7 @@ table.controller("tableController",['$rootScope','$scope', '$http','$timeout','$
         };
 
         $timeout(function(){
-            $http.get('data/vuln/table/' + object.selectedVendor + '/' + object.selected+'/'+object.filter)
+            $http.get('data/vendor/table/' + object.selectedVendor + '/' + object.selected+'/'+object.filter)
                 .then(function(data) {
                     $scope.loading = false;
                     console.log(data);

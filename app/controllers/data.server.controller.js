@@ -7,61 +7,100 @@ var connection = require('../../config/mysql');
 var mysql = require('mysql');
 var fs = require('fs');
 var async = require('async');
-exports.getExploit = function(req,res,next){
-    call(connection,'select * from exploitdb', req,res,next);
-};
 
-exports.getRefs = function(req,res,next){
-    call(connection,'select * from refs', req,res,next);
-};
-
-exports.getTools = function(req,res,next){
-    call(connection,'select * from tools',req,res,next);
-};
-
-exports.getVirus = function(req,res,next){
-    call(connection,'select * from virus_info',req,res,next);
-};
+/***************************For Table***********************************/
 
 exports.getVendor = function(req,res,next){
-    call(connection,"select distinct(vendor) from vuln_soft where `vendor` LIKE '%"+req.params["ven"]+"%'",req,res,next);
-}
-
-exports.getVuln = function(req,res,next){
-    call(connection,'select * from vuln_soft',req,res,next);
+    console.log("likeVendorName");
+    var sql = "select distinct(vendor_name) from vendor where `vendor_name` LIKE ?";
+    var inserts = ["%"+req.params["likeVendorName"]+"%"];
+    sql = mysql.format(sql,inserts);
+    call(connection,sql,req,res,next);
 };
 
-exports.getVulnVersionNum = function(req,res,next){
-    call(connection,"select distinct(vers_num) from vuln_soft where `vendor` ='"+req.params['vendor']+"' and " +
-        "`prod_name` = '"+req.params['product']+"'",req,res,next);
-};
-
-exports.getEdition = function(req,res,next){
-    console.log("edition");
-    var edtion = req.params['exactVersion'] == "empty"?"":req.params['exactVersion'];
-    call(connection,"select distinct(edition) from vuln_soft where `vendor` ='"+req.params['vendor']+"' and " +
-        "`prod_name` = '"+req.params['product']+"' and "+"`vers_num` = '"+
-        edtion+"'",req,res,next);
-};
-
-exports.getCveNum = function(req,res,next){
-    var edtion = req.params['exactVersion'] == "empty"?"":req.params['exactVersion'];
-    call(connection,"select vname from vuln_soft where `vendor` ='"+req.params['vendor']+"' and " +
-        "`prod_name` = '"+req.params['product']+"' and "+"`vers_num` = '"+
-        edtion+"' and "+"`edition` ='"+req.params['cveNum']+"'",req,res,next);
-};
-
-exports.selectOne = function(req,res,next){
-    var sql = 'select distinct(prod_name) from vuln_soft where vendor = ?';
+exports.getProductFromVendor = function(req,res,next){
+    console.log("productfromvendor");
+    var sql = "select distinct(prod_name) from vendor where vendor_name = ?";
     var inserts = [req.params["vendor"]];
     sql = mysql.format(sql,inserts);
     call(connection,sql,req,res,next);
 };
 
 
-exports.selectProducts = function(req,res,next){
-    console.log("product");
+exports.getProductVersionNumber = function(req,res,next){
+    console.log("productVersionNumber");
+    var sql = "select distinct(vers_num) from vendor where `vendor_name` = ? and `prod_name` = ?";
+    var inserts = [req.params["vendor"],req.params["product"]];
+    sql = mysql.format(sql,inserts);
+    call(connection,sql,req,res,next);
+};
+
+exports.getTableProducts = function(req,res,next){
     var ver;
+    console.log("tableProduct");
+    if(req.params['version'] == 'empty'){
+        ver = "%%"
+    }else{
+        ver = "%"+req.params['version']+"%";
+    }
+    var sql = "select * from vendor where vendor_name = ? and prod_name = ? and `vers_num` LIKE ?";
+    var inserts = [req.params["vendor"],req.params["product"],ver];
+    sql = mysql.format(sql,inserts);
+    call(connection,sql,req,res,next);
+};
+
+/****************************For Tree Chart**********************************/
+
+exports.getLikeProducts = function(req,res,next){
+    var ver;
+    console.log("likeProduct");
+    if(req.params['version'] == 'empty'){
+        ver = "%%"
+    }else{
+        ver = "%"+req.params['version']+"%";
+    }
+    var sql = "select distinct(vers_num) from vendor where vendor_name = ? and prod_name = ? and `vers_num` LIKE ?";
+    var inserts = [req.params["vendor"],req.params["product"],ver];
+    sql = mysql.format(sql,inserts);
+    call(connection,sql,req,res,next);
+};
+
+exports.getExactProducts = function(req,res,next){
+    console.log("exactProduct");
+    var version = req.params['version'] == "empty"?"":req.params['version'];
+    var sql = "select distinct(edition) from vendor where `vendor_name` = ? and `prod_name` = ? and `vers_num` = ?";
+    var inserts = [req.params["vendor"],req.params["product"],version];
+    console.log(inserts);
+    sql = mysql.format(sql,inserts);
+    call(connection,sql,req,res,next);
+};
+
+exports.getCveNum = function(req,res,next){
+    console.log("cveNum");
+    var version = req.params['version'] == "empty"?"":req.params['version'];
+    var edition = req.params['edition'] == "empty"?"":req.params['edition'];
+    var vendor_id ;
+    var sql = "select vendor_id from vendor where vendor_name = ? and prod_name = ? and vers_num = ? and edition = ?";
+    var inserts = [req.params["vendor"],req.params["product"],version,edition];
+    sql = mysql.format(sql,inserts);
+    console.log(sql);
+    connection.query(sql, function (err, rows) {
+        console.log(rows);
+        vendor_id = rows[0].vendor_id;
+        sql = "select a.* from CVEs as a inner join cve_vendor b on a.cve_id = b.cve_id where b.vendor_id = ?";
+        inserts = [vendor_id];
+        sql = mysql.format(sql,inserts);
+        console.log(sql);
+        call(connection,sql,req,res,next);
+    });
+    //SELECT a.* FROM `CVEs` as a inner join cve_vendor b on a.cve_id = b.cve_id WHERE b.vendor_id= 2/
+};
+
+/*****************************NOT USED YET*********************************************/
+
+exports.selectProducts = function(req,res,next){
+    var ver;
+    console.log("treeProduct");
     if(req.params['version'] == 'empty'){
         ver = "%%"
     }else{
@@ -72,21 +111,6 @@ exports.selectProducts = function(req,res,next){
     sql = mysql.format(sql,inserts);
     call(connection,sql,req,res,next);
 };
-
-
-exports.getTableProducts = function(req,res,next){
-    console.log("tableProducts");
-    var ver;
-    if(req.params['version'] == 'empty'){
-        ver = "%%"
-    }else{
-        ver = "%"+req.params['version']+"%";
-    }
-    var sql = 'select * from vuln_soft where vendor = ? and prod_name = ? and `vers_num` LIKE ?';
-    var inserts = [req.params["vendor"],req.params["product"],ver];
-    sql = mysql.format(sql,inserts);
-    call(connection,sql,req,res,next);
-}
 
 exports.selectAll = function(req,res,next){
     var sql = 'select * from ??';
@@ -101,7 +125,6 @@ exports.getSmartExploits = function(req,res,next){
     var inserts = ["exploit-db.com",cve];
     sql = mysql.format(sql,inserts);
     connection.query(sql, function (err, rows) {
-        console.log("rows",rows );
         if(rows != ""){
             var paths = [];
               /*  for(var i = 0; i<rows.length;i++){
@@ -115,7 +138,6 @@ exports.getSmartExploits = function(req,res,next){
             };
                 paths.forEach(function(path,index){
                 fs.readFile(path,function(err,content){
-                    console.log(content.toString());
                     results.push(content.toString());
                     if(index === paths.length - 1){
                         object.results  = results;
@@ -138,17 +160,9 @@ exports.getSmartExploits = function(req,res,next){
 
 function call(connection,query,req,res,next){
         connection.query(query, function (err, rows) {
-           /* if(err){
-                throw err;
-            }else {
-                res.json(rows);
-            }*/
-            //connection.release();
             try{
                 res.json(rows);
             }catch(err){
-                console.log(err.code);
-                console.log(err.fatal);
                 res.json(err);
             }
         });

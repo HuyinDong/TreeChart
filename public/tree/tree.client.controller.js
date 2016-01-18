@@ -22,9 +22,10 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
     }
 
     $timeout(function() {
-        $http.get('/data/vuln/' + object.selectedVendor + '/' + object.selected + '/' + object.filter).then(function (data) {
+        $http.get('/data/vendor/tree/like/' + object.selectedVendor + '/' + object.selected + '/' + object.filter).then(function (data) {
             $scope.loading = false;
             newData = data.data;
+            console.log(newData);
             root.children = _.map(newData,function(d){
                 if(d.vers_num == ""){
                     d.name = "empty";
@@ -80,7 +81,7 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
 
                 // Normalize for fixed-depth.
                 nodes.forEach(function (d) {
-                    d.y = d.depth * 180;
+                    d.y = d.depth * 280;
                 });
 
                 // Update the nodes…
@@ -126,7 +127,7 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                     });
 
                 nodeUpdate.select("circle")
-                    .attr("r", 4.5)
+                    .attr("r", 3.5)
                     .style("fill", function (d) {
                         return d._children ? "lightsteelblue" : "#fff";
                     });
@@ -187,21 +188,70 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
             }
 
 // Toggle children.
+            var totalArray;
+            var times= 0;
+            var children;
+            var previous;
             function toggle(d) {
-                if (d.children) {
-                    d._children = d.children;
-                    d.children = null;
-                } else {
-                    d.children = d._children;
-                    d._children = null;
-                }
-                if (d.parent) {
-                    d.parent.children.forEach(function (element) {
-                        if (d !== element) {
-                            collapse(element);
+                if(d.name == "Load More"){
+                    console.log(totalArray);
+                    console.log(times);
+                    var temp = _.map(totalArray[times], function (d) {
+                        console.log("d", d);
+                        var name;
+                        if(d.cvename == null)
+                        {
+                            if (d[Object.keys(d)[0]] == "") {
+                                name = "empty";
+                            } else {
+                                name = d[Object.keys(d)[0]];
+                            }
+                            return {
+                                name: name
+                            }
+                        }else{
+                            if (d[Object.keys(d)[1]] == "") {
+                                name = "empty";
+                            } else {
+                                name = d[Object.keys(d)[1]];
+                            }
+                            return {
+                                name: name
+                            }
                         }
                     });
-                }
+                    console.log(temp);
+                    console.log(children);
+                    children.pop();
+                    children = children.concat(temp);
+                    times++;
+                    if(times < totalArray.length){
+                        children.push({
+                            name : "Load More"
+                        });
+
+                    }
+
+                    d.parent.children = children;
+                    update(d);
+                }else {
+                    totalArray = [];
+                    times = 0;
+                    children = [];
+                    if (d.children) {
+                        d._children = d.children;
+                        d.children = null;
+                    } else {
+                        d.children = d._children;
+                        d._children = null;
+                    }
+                    if (d.parent) {
+                        d.parent.children.forEach(function (element) {
+                            if (d !== element) {
+                                collapse(element);
+                            }
+                        });
+                    }
 
                     var path = "/" + d.name;
                     for (var i = 1; i < d.depth; i++) {
@@ -209,53 +259,82 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                     }
                     var newPath = path.split("/");
                     newPath.shift();
+
                     path = "";
                     for (var i = 0; i < newPath.length; i++) {
                         path += "/" + newPath[newPath.length - 1 - i];
                     }
-
-                    $http.get('/data/vuln1/' + object.selectedVendor + '/' + object.selected + path)
+                    console.log(path);
+                    $http.get('/data/vendor/tree/' + object.selectedVendor + '/' + object.selected + path)
                         .then(function (data) {
-                            console.log("data",data);
+                            console.log("data", data);
                             var chunk;
-                            if(data.data.length > 30){
-                                chunk = _.chunk(data.data,30);
-                                var layer3 = [];
-                                var middleLayer  = [];
-                                var cve = [];
-                                for(var i = 0; i < chunk.length;i++){
-                                    middleLayer.push({
-                                        name : i*30+1+"-"+(i+1)*30,
-                                        children : null,
-                                        _children : null
-                                    });
-                                    for(var j = 0; j < chunk[i].length;j++){
-                                        cve.push({
-                                            name : chunk[i][j][Object.keys(chunk[i][j])],
-                                            children : null
-                                        });
-                                    }
-                                    middleLayer[i].children = cve;
-                                    cve = [];
-                                    d.children = middleLayer;
-                                }
+
+
+                            if (data.data.length > 7) {
+                                totalArray = _.chunk(data.data, 7);
+                                console.log(totalArray);
+                                     children = _.map(totalArray[0], function (d) {
+                                    var name;
+                                         if(d.cvename == null)
+                                         {
+                                             if (d[Object.keys(d)[0]] == "") {
+                                                 name = "empty";
+                                             } else {
+                                                 name = d[Object.keys(d)[0]];
+                                             }
+                                             return {
+                                                 name: name
+                                             }
+                                         }else{
+                                             if (d[Object.keys(d)[1]] == "") {
+                                                 name = "empty";
+                                             } else {
+                                                 name = d[Object.keys(d)[1]];
+                                             }
+                                             return {
+                                                 name: name
+                                             }
+                                         }
+                                });
+                                children.push({
+                                     name: "Load More"
+                                });
+                                times++;
+                                console.log(children);
                             }else{
-                                chunk = data.data;
-                                var children = _.map(chunk, function (newData) {
-                                    var name ;
-                                    if(newData[Object.keys(newData)[0]] == ""){
-                                        name = "empty";
+                                children = _.map(data.data, function (d) {
+                                    var name;
+                                    if(d.cvename == null)
+                                    {
+                                        if (d[Object.keys(d)[0]] == "") {
+                                            name = "empty";
+                                        } else {
+                                            name = d[Object.keys(d)[0]];
+                                        }
+                                        return {
+                                            name: name
+                                        }
                                     }else{
-                                        name = newData[Object.keys(newData)[0]];
-                                    }
-                                    return {
-                                        name: name
+                                        if (d[Object.keys(d)[1]] == "") {
+                                            name = "empty";
+                                        } else {
+                                            name = d[Object.keys(d)[1]];
+                                        }
+                                        return {
+                                            name: name
+                                        }
                                     }
                                 });
-                                d.children = children;
+
+
                             }
+                            d.children = children;
+                            console.log("last");
                             update(d);
                         });
+
+                }
 
             }
 

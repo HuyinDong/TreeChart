@@ -22,7 +22,7 @@ detail.controller('detailController',['$scope','items','$mdDialog','$http','$sce
             $scope.newData.push($sce.trustAsHtml(data.data.results[i]));
         }
 
-    },1500);
+    },800);
     });
     $scope.closeDialog = function(){
         $mdDialog.cancel();

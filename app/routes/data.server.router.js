@@ -7,17 +7,24 @@ module.exports = function(app){
     app.get('/test', function (req, res) {
         res.render('test', {});
     });
-    app.get('/data/exploit',data.getExploit);
-    app.get('/data/refs', data.getRefs);
-    app.get('/data/tools',data.getTools);
-    app.get('/data/virus',data.getVirus);
-    app.get('/data/vuln',data.getVuln);
-    app.get('/data/vendor/:ven',data.getVendor);
-    app.get('/data/vuln/:vendor',data.selectOne);
-    app.get('/data/vuln/version/:vendor/:product',data.getVulnVersionNum);
 
-    app.get('/data/vuln1/:vendor/:product/:exactVersion',data.getEdition);
-    app.get('/data/vuln1/:vendor/:product/:exactVersion/:cveNum',data.getCveNum);
-    app.get('/data/vuln/table/:vendor/:product/:version',data.getTableProducts);
+
+    app.get('/data/vendor/like/:likeVendorName',data.getVendor);
+    app.get('/data/vendor/:vendor',data.getProductFromVendor);
+    app.get('/data/vendor/:vendor/:product',data.getProductVersionNumber);
+    app.get('/data/vendor/table/:vendor/:product/:version',data.getTableProducts);
+
+
+    /****************************Above Good******************************/
+    app.get('/data/vendor/tree/like/:vendor/:product/:version',data.getLikeProducts);
+    app.get('/data/vendor/tree/:vendor/:product/:version',data.getExactProducts);
+    app.get('/data/vendor/tree/:vendor/:product/:version/:edition',data.getCveNum);
+
+
+    //app.get('/data/vuln1/:vendor/:product/:exactVersion',data.getEdition);
+
+
+
+
     app.get('/data/smartexploits/:cve',data.getSmartExploits);
 };
