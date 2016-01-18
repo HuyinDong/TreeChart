@@ -187,16 +187,18 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                 });
             }
 
-// Toggle children.
-            var totalArray;
-            var times= 0;
-            var children;
-            var previous;
+                // Toggle children.
+            var depthTwoArr;
+            var depthTwoTimes= 0;
+            var depthTwoChildren;
+            var depthThreeArr;
+            var depthThreeTimes= 0;
+            var depthThreeChildren;
             function toggle(d) {
-                if(d.name == "Load More"){
-                    console.log(totalArray);
-                    console.log(times);
-                    var temp = _.map(totalArray[times], function (d) {
+                if(d.name == "Load More" && d.depth == 2){
+                    console.log(depthTwoArr);
+                    console.log(depthTwoTimes);
+                    var temp = _.map(depthTwoArr[depthTwoTimes], function (d) {
                         console.log("d", d);
                         var name;
                         if(d.cvename == null)
@@ -220,24 +222,64 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                             }
                         }
                     });
-                    console.log(temp);
-                    console.log(children);
-                    children.pop();
-                    children = children.concat(temp);
-                    times++;
-                    if(times < totalArray.length){
-                        children.push({
+
+                    depthTwoChildren.pop();
+                    depthTwoChildren = depthTwoChildren.concat(temp);
+                    depthTwoTimes++;
+                    if(depthTwoTimes < depthTwoArr.length){
+                        depthTwoChildren.push({
                             name : "Load More"
                         });
-
                     }
-
-                    d.parent.children = children;
+                    d.parent.children = depthTwoChildren;
                     update(d);
-                }else {
-                    totalArray = [];
-                    times = 0;
-                    children = [];
+                }else if(d.name == "Load More" && d.depth == 3){
+
+                    var temp = _.map(depthThreeArr[depthThreeTimes], function (d) {
+                        console.log("d", d);
+                        var name;
+                        if(d.cvename == null)
+                        {
+                            if (d[Object.keys(d)[0]] == "") {
+                                name = "empty";
+                            } else {
+                                name = d[Object.keys(d)[0]];
+                            }
+                            return {
+                                name: name
+                            }
+                        }else{
+                            if (d[Object.keys(d)[1]] == "") {
+                                name = "empty";
+                            } else {
+                                name = d[Object.keys(d)[1]];
+                            }
+                            return {
+                                name: name
+                            }
+                        }
+                    });
+                    depthThreeChildren.pop();
+                    depthThreeChildren = depthThreeChildren.concat(temp);
+                    depthThreeTimes++;
+                    if(depthThreeTimes < depthThreeArr.length){
+                        depthThreeChildren.push({
+                            name : "Load More"
+                        });
+                    }
+                    d.parent.children = depthThreeChildren;
+                    update(d);
+                }else if(d.depth == 2 || d.depth ==3 || d.depth ==1){
+                    if(d.depth == 1) {
+                        depthTwoArr = [];
+                        depthTwoTimes = 0;
+                        depthTwoChildren = [];
+                    }
+                    if(d.depth == 2) {
+                        depthThreeArr = [];
+                        depthThreeTimes = 0;
+                        depthThreeChildren = [];
+                    }
                     if (d.children) {
                         d._children = d.children;
                         d.children = null;
@@ -252,7 +294,6 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                             }
                         });
                     }
-
                     var path = "/" + d.name;
                     for (var i = 1; i < d.depth; i++) {
                         path = path + "/" + d.parent.name;
@@ -267,14 +308,12 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                     console.log(path);
                     $http.get('/data/vendor/tree/' + object.selectedVendor + '/' + object.selected + path)
                         .then(function (data) {
-                            console.log("data", data);
-                            var chunk;
-
-
+                            console.log(data.data);
                             if (data.data.length > 7) {
+                                var totalArray;
                                 totalArray = _.chunk(data.data, 7);
-                                console.log(totalArray);
-                                     children = _.map(totalArray[0], function (d) {
+
+                                var children = _.map(totalArray[0], function (d) {
                                     var name;
                                          if(d.cvename == null)
                                          {
@@ -297,47 +336,39 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                                              }
                                          }
                                 });
-                                children.push({
-                                     name: "Load More"
-                                });
-                                times++;
-                                console.log(children);
+                                if(d.depth == 1){
+                                    depthTwoArr = totalArray;
+                                    depthTwoChildren = children;
+                                    depthTwoChildren.push({
+                                        name: "Load More"
+                                    });
+                                    depthTwoTimes++;
+                                }else if(d.depth == 2){
+                                    depthThreeArr = totalArray;
+                                    depthThreeChildren = children;
+                                    depthThreeChildren.push({
+                                        name: "Load More"
+                                    });
+                                    depthThreeTimes++;
+                                }
                             }else{
                                 children = _.map(data.data, function (d) {
-                                    var name;
-                                    if(d.cvename == null)
-                                    {
-                                        if (d[Object.keys(d)[0]] == "") {
-                                            name = "empty";
-                                        } else {
-                                            name = d[Object.keys(d)[0]];
-                                        }
-                                        return {
-                                            name: name
-                                        }
-                                    }else{
-                                        if (d[Object.keys(d)[1]] == "") {
-                                            name = "empty";
-                                        } else {
-                                            name = d[Object.keys(d)[1]];
-                                        }
-                                        return {
-                                            name: name
-                                        }
-                                    }
+
                                 });
-
-
+                                if(d.depth == 1){
+                                    depthTwoChildren = children;
+                                }else if(d.depth == 2){
+                                    depthThreeChildren = children;
+                                }
                             }
                             d.children = children;
-                            console.log("last");
                             update(d);
                         });
 
+                }else{
+                    console.log("wrong");
                 }
-
             }
-
             function collapse(d) {
                 if (d.children) {
                     d._children = d.children;
