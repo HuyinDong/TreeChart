@@ -5,9 +5,9 @@ detail.controller('detailController',['$scope','items','$mdDialog','$http','$sce
     function($scope,items,$mdDialog,$http,$sce,$timeout){
         $scope.loading = true;
     $scope.cve = items;
-    $(function(){
+   /* $(function(){
         SyntaxHighlighter.all();
-    });
+    });*/
     $scope.newData = [];
     $scope.contents = [];
 
