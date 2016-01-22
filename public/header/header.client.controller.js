@@ -13,11 +13,12 @@ header.controller("headerController",function($scope,$http,$rootScope,$state,$md
     $(document).on('keypress', '#vendor', getVendorInfo);
     function getVendorInfo() {
         if($('#vendor').val().length+1 > 2 && !excuted){
-            $http.get('/data/vendor/'+$('#vendor').val()).then(function (data) {
-                // var temp = _.slice(data.data,0,10);
+            $http.get('/data/vendor/like/'+$('#vendor').val()).then(function (data) {
+                console.log(data);
                 $scope.object.vendor = _.map(data.data, function (d) {
-                    return d.vendor;
+                    return d.vendor_name;
                 });
+                console.log($scope.object.vendor);
                 excuted = true;
             });
         }else if($('#vendor').val().length+1 < 2){
@@ -36,7 +37,7 @@ header.controller("headerController",function($scope,$http,$rootScope,$state,$md
             $scope.object.filter = '';
         }
 
-        $http.get('/data/vuln/' + $scope.object.selectedVendor).then(function (data) {
+        $http.get('/data/vendor/' + $scope.object.selectedVendor).then(function (data) {
             $scope.object.products = data.data;
         });
 
@@ -70,7 +71,7 @@ header.controller("headerController",function($scope,$http,$rootScope,$state,$md
     $(document).on('focus', '#filter', getVersionNum);
 
     function getVersionNum(){
-        $http.get('/data/vuln/version/' + $scope.object.selectedVendor+'/'+$scope.object.selected).then(function (data) {
+        $http.get('/data/vendor/' + $scope.object.selectedVendor+'/'+$scope.object.selected).then(function (data) {
             var arr = _.forEach(data.data,function(d){
                 if(d.vers_num ==""){
                     d.vers_num = "empty";

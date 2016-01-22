@@ -1,0 +1,53 @@
+<!--<md-dialog style = 'width : 800px; height : 900px'>
+    <md-toolbar class="md-theme-light">
+        <h4 class="md-toolbar-tools">
+            <span>Exploits of {{cve}}:</span>
+        </h4>
+    </md-toolbar>
+    <md-content id = 'inner'>
+        <pre class="brush: c;gutter:true;auto-links: false, smart-tabs: true;;" style = "padding :15px">
+            {{content}}
+        </pre>
+</md-content>
+    <md-button ng-click = 'closeDialog()' class = 'md-primary'>Close</md-button>
+</md-dialog>-->
+
+<md-dialog aria-label="Mango (Fruit)">
+    <form>
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>Exploits of {{cve}}:</h2>
+                <span flex></span>
+            </div>
+        </md-toolbar>
+        <md-dialog-content style="max-width:800px;max-height:810px; ">
+           <div layout = "column">
+                <div flex>
+                    <p>CVE : {{info[0].ereferences}}</p>
+                </div>
+               <div flex>
+                   <p>Publiched : {{info.published}}</p>
+               </div>
+               <div flex>
+                   <p>Severity : {{info.severity}}</p>
+               </div>
+               <div flex>
+                   <p>Description : {{info.description}}</p>
+               </div>
+           </div>
+            <md-tabs md-dynamic-height md-border-bottom>
+                <md-tab label="one" ng-repeat="x  in newData">
+
+                        <h1 class="md-display-2">Tab One</h1>
+                            <pre class="brush: c;gutter:true;auto-links: false, smart-tabs: true;;" style = "padding :15px">
+            {{x}}
+        </pre>
+
+                </md-tab>
+
+            </md-tabs>
+        </md-dialog-content>
+    </form>
+    <md-progress-circular md-mode="indeterminate" ng-show="loading"
+                          style = "position:absolute;right:50%;top:50%;"></md-progress-circular>
+</md-dialog>

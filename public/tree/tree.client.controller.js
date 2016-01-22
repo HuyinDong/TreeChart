@@ -1,4 +1,4 @@
-tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeout) {
+tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeout,$mdDialog) {
 
 
     /**
@@ -22,9 +22,10 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
     }
 
     $timeout(function() {
-        $http.get('/data/vuln/' + object.selectedVendor + '/' + object.selected + '/' + object.filter).then(function (data) {
+        $http.get('/data/vendor/tree/like/' + object.selectedVendor + '/' + object.selected + '/' + object.filter).then(function (data) {
             $scope.loading = false;
             newData = data.data;
+            console.log(newData);
             root.children = _.map(newData,function(d){
                 if(d.vers_num == ""){
                     d.name = "empty";
@@ -80,7 +81,7 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
 
                 // Normalize for fixed-depth.
                 nodes.forEach(function (d) {
-                    d.y = d.depth * 180;
+                    d.y = d.depth * 280;
                 });
 
                 // Update the nodes…
@@ -126,7 +127,7 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                     });
 
                 nodeUpdate.select("circle")
-                    .attr("r", 4.5)
+                    .attr("r", 3.5)
                     .style("fill", function (d) {
                         return d._children ? "lightsteelblue" : "#fff";
                     });
@@ -186,77 +187,228 @@ tree.controller("treeController",function($scope,$http,$rootScope,$state,$timeou
                 });
             }
 
-// Toggle children.
+                // Toggle children.
+            var depthTwoArr;
+            var depthTwoTimes= 0;
+            var depthTwoChildren;
+            var depthThreeArr;
+            var depthThreeTimes= 0;
+            var depthThreeChildren;
             function toggle(d) {
-                if (d.children) {
-                    d._children = d.children;
-                    d.children = null;
-                } else {
-                    d.children = d._children;
-                    d._children = null;
-                }
-                if (d.parent) {
-                    d.parent.children.forEach(function (element) {
-                        if (d !== element) {
-                            collapse(element);
+                console.log(d);
+                if(d.name == "Load More" && d.depth == 2){
+                    console.log(depthTwoArr);
+                    console.log(depthTwoTimes);
+                    var temp = _.map(depthTwoArr[depthTwoTimes], function (d) {
+                        var name;
+                        if(d.cvename == null)
+                        {
+                            if (d[Object.keys(d)[0]] == "") {
+                                name = "empty";
+                            } else {
+                                name = d[Object.keys(d)[0]];
+                            }
+                            return {
+                                name: name
+                            }
+                        }else{
+                            if (d[Object.keys(d)[1]] == "") {
+                                name = "empty";
+                            } else {
+                                name = d[Object.keys(d)[1]];
+                            }
+                            return {
+                                name: name
+                            }
                         }
                     });
-                }
 
+                    depthTwoChildren.pop();
+                    depthTwoChildren = depthTwoChildren.concat(temp);
+                    depthTwoTimes++;
+                    if(depthTwoTimes < depthTwoArr.length){
+                        depthTwoChildren.push({
+                            name : "Load More"
+                        });
+                    }
+                    d.parent.children = depthTwoChildren;
+                    update(d);
+                }else if(d.name == "Load More" && d.depth == 3){
+
+                    var temp = _.map(depthThreeArr[depthThreeTimes], function (d) {
+                        var name;
+                        if(d.cvename == null)
+                        {
+                            if (d[Object.keys(d)[0]] == "") {
+                                name = "empty";
+                            } else {
+                                name = d[Object.keys(d)[0]];
+                            }
+                            return {
+                                name: name
+                            }
+                        }else{
+                            if (d[Object.keys(d)[1]] == "") {
+                                name = "empty";
+                            } else {
+                                name = d[Object.keys(d)[1]];
+                            }
+                            return {
+                                name: name
+                            }
+                        }
+                    });
+                    depthThreeChildren.pop();
+                    depthThreeChildren = depthThreeChildren.concat(temp);
+                    depthThreeTimes++;
+                    if(depthThreeTimes < depthThreeArr.length){
+                        depthThreeChildren.push({
+                            name : "Load More"
+                        });
+                    }
+                    d.parent.children = depthThreeChildren;
+                    update(d);
+                }else if(d.depth == 2 || d.depth ==1){
+                    if(d.depth == 1) {
+                        depthTwoArr = [];
+                        depthTwoTimes = 0;
+                        depthTwoChildren = [];
+                    }
+                    if(d.depth == 2) {
+                        depthThreeArr = [];
+                        depthThreeTimes = 0;
+                        depthThreeChildren = [];
+                    }
+                    if (d.children) {
+                        d._children = d.children;
+                        d.children = null;
+                    } else {
+                        d.children = d._children;
+                        d._children = null;
+                    }
+                    if (d.parent) {
+                        d.parent.children.forEach(function (element) {
+                            if (d !== element) {
+                                collapse(element);
+                            }
+                        });
+                    }
                     var path = "/" + d.name;
+                    var par = d.parent;
                     for (var i = 1; i < d.depth; i++) {
-                        path = path + "/" + d.parent.name;
+                        path = path + "/" + par.name;
+                        console.log(path);
+                        par = par.parent;
                     }
                     var newPath = path.split("/");
                     newPath.shift();
+                    console.log(newPath);
                     path = "";
                     for (var i = 0; i < newPath.length; i++) {
                         path += "/" + newPath[newPath.length - 1 - i];
                     }
-
-                    $http.get('/data/vuln1/' + object.selectedVendor + '/' + object.selected + path)
+                    console.log(path);
+                    $http.get('/data/vendor/tree/' + object.selectedVendor + '/' + object.selected + path)
                         .then(function (data) {
-                            console.log("data",data);
-                            var chunk;
-                            if(data.data.length > 30){
-                                chunk = _.chunk(data.data,30);
-                                var layer3 = [];
-                                var middleLayer  = [];
-                                var cve = [];
-                                for(var i = 0; i < chunk.length;i++){
-                                    middleLayer.push({
-                                        name : i*30+1+"-"+(i+1)*30,
-                                        children : null,
-                                        _children : null
+                            if (data.data.length > 7) {
+                                var totalArray;
+                                totalArray = _.chunk(data.data, 7);
+
+                                var children = _.map(totalArray[0], function (d) {
+                                    var name;
+                                         if(d.cvename == null)
+                                         {
+                                             if (d[Object.keys(d)[0]] == "") {
+                                                 name = "empty";
+                                             } else {
+                                                 name = d[Object.keys(d)[0]];
+                                             }
+                                             return {
+                                                 name: name
+                                             }
+                                         }else{
+                                             if (d[Object.keys(d)[1]] == "") {
+                                                 name = "empty";
+                                             } else {
+                                                 name = d[Object.keys(d)[1]];
+                                             }
+                                             return {
+                                                 name: name
+                                             }
+                                         }
+                                });
+                                if(d.depth == 1){
+                                    depthTwoArr = totalArray;
+                                    depthTwoChildren = children;
+                                    depthTwoChildren.push({
+                                        name: "Load More"
                                     });
-                                    for(var j = 0; j < chunk[i].length;j++){
-                                        cve.push({
-                                            name : chunk[i][j][Object.keys(chunk[i][j])],
-                                            children : null
-                                        });
-                                    }
-                                    middleLayer[i].children = cve;
-                                    cve = [];
-                                    d.children = middleLayer;
+                                    depthTwoTimes++;
+                                }else if(d.depth == 2){
+                                    depthThreeArr = totalArray;
+                                    depthThreeChildren = children;
+                                }else{
+
+                                }
+                                console.log(depthTwoArr);
+                                if(d.depth == 1){
+                                }else if(d.depth == 2){
+                                    depthThreeChildren.push({
+                                        name: "Load More"
+                                    });
+                                    depthThreeTimes++;
+                                }else{
+
                                 }
                             }else{
-                                chunk = data.data;
-                                var children = _.map(chunk, function (newData) {
-                                    var name ;
-                                    if(newData[Object.keys(newData)[0]] == ""){
-                                        name = "empty";
+                                var children;
+                                children = _.map(data.data, function (d) {
+                                    var name;
+                                    if(d.cvename == null)
+                                    {
+                                        if (d[Object.keys(d)[0]] == "") {
+                                            name = "empty";
+                                        } else {
+                                            name = d[Object.keys(d)[0]];
+                                        }
+                                        return {
+                                            name: name
+                                        }
                                     }else{
-                                        name = newData[Object.keys(newData)[0]];
-                                    }
-                                    return {
-                                        name: name
+                                        if (d[Object.keys(d)[1]] == "") {
+                                            name = "empty";
+                                        } else {
+                                            name = d[Object.keys(d)[1]];
+                                        }
+                                        return {
+                                            name: name
+                                        }
                                     }
                                 });
-                                d.children = children;
+                                if(d.depth == 1){
+                                    depthTwoChildren = children;
+                                }else if(d.depth == 2){
+                                    depthThreeChildren = children;
+                                }else{
+
+                                }
                             }
+                            d.children = children;
                             update(d);
                         });
 
+                }else if(d.depth == 3){
+                    $mdDialog.show({
+                        templateUrl: './detail/detail.client.view.html',
+                        locals: {
+                            items: d.name
+                        },
+                        controller: 'detailController',
+                        clickOutsideToClose: true
+                    });
+                }else{
+                    console.log("wrong");
+                }
             }
 
             function collapse(d) {

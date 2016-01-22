@@ -1,5 +1,13 @@
-<div style = "margin-top : 10px;">
-    <div id="grid1" ui-grid="gridOptions" ui-grid-grouping ui-grid-selection class="grid"></div>
-    <md-button class="md-raised md-primary" ng-click="getDetail()" ng-disabled="!selected"  style = "width:120px;height:30px;margin-top:20px">Detail</md-button>
+
+<div style = "margin-top : 10px;" layout = "column">
+   <div layout = 'row' layout-align="space-between center">
+       <div style = "margin-left : 10px;"><h4>Smart Exploits Table</h4></div>
+   </div>
+    <div flex id="grid1" ui-grid="gridOptions"
+         ui-grid-grouping ui-grid-auto-resize ui-grid-cellNav
+         class="grid" style="{{height}}"></div>
+
 </div>
-<md-progress-circular md-mode="indeterminate" ng-show="loading" style = "position:absolute;right:50%;top:50%;"></md-progress-circular>
+
+<md-progress-circular md-mode="indeterminate" ng-show="loading"
+                      style = "position:absolute;right:50%;top:50%;"></md-progress-circular>
