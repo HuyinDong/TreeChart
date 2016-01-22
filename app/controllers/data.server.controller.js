@@ -39,7 +39,6 @@ exports.getProductVersionNumber = function(req,res,next){
 
 exports.getTableProducts = function(req,res,next){
     var ver;
-    console.log("tableProduct");
     if(req.params['version'] == 'empty'){
         ver = "%%"
     }else{
@@ -49,11 +48,10 @@ exports.getTableProducts = function(req,res,next){
     //   JOIN code_to_user_ref b ON a.user_id = b.user_id
     //   JOIN codes c ON b.code_id = c.code_id
     var sql = "select a.vers_num, a.edition , c.cvename from vendor a " +
-        "join cve_vendor b on a.vendor_id = b.vendor_id " +
-        "join CVEs c on b.cve_id = c.cve_id where vendor_name = ? and prod_name = ? and vers_num like ?";
+        "inner join cve_vendor b on a.vendor_id = b.vendor_id " +
+        "inner join CVEs c on b.cve_id = c.cve_id where vendor_name = ? and prod_name = ? and vers_num like ?";
     var inserts = [req.params["vendor"],req.params["product"],ver];
     sql = mysql.format(sql,inserts);
-    console.log(sql);
     call(connection,sql,req,res,next);
 };
 
@@ -61,7 +59,6 @@ exports.getTableProducts = function(req,res,next){
 
 exports.getLikeProducts = function(req,res,next){
     var ver;
-    console.log("likeProduct");
     if(req.params['version'] == 'empty'){
         ver = "%%"
     }else{
@@ -70,7 +67,6 @@ exports.getLikeProducts = function(req,res,next){
     var sql = "select distinct(vers_num) from vendor where vendor_name = ? and prod_name = ? and `vers_num` LIKE ?";
     var inserts = [req.params["vendor"],req.params["product"],ver];
     sql = mysql.format(sql,inserts);
-    console.log(sql);
     call(connection,sql,req,res,next);
 };
 
