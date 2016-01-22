@@ -28,7 +28,7 @@ table.controller("tableController",['$rootScope','$scope', '$http','$timeout','$
             multiSelect:false,
             columnDefs: [
                 { field: 'edition', width: '33%', displayName : 'Edtion',allowCellFocus : false},
-                { field: 'vname', width: '33%' , displayName : 'CVE',cellTemplate: cellTemplate},
+                { field: 'cvename', width: '33%' , displayName : 'CVE',cellTemplate: cellTemplate},
 
                 { field: 'vers_num',  grouping: { groupPriority: 0 },allowCellFocus : false,
                     sort: { priority: 0, direction: 'desc' }, width: '29%',displayName : 'Version Number',}

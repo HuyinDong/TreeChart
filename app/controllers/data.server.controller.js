@@ -43,9 +43,15 @@ exports.getTableProducts = function(req,res,next){
     }else{
         ver = "%"+req.params['version']+"%";
     }
-    var sql = "select * from vendor where vendor_name = ? and prod_name = ? and `vers_num` LIKE ?";
+    //   SELECT a.name,a.email, GROUP_CONCAT(c.code)FROM users a
+    //   JOIN code_to_user_ref b ON a.user_id = b.user_id
+    //   JOIN codes c ON b.code_id = c.code_id
+    var sql = "select a.vers_num, a.edition , c.cvename from vendor a " +
+        "join cve_vendor b on a.vendor_id = b.vendor_id " +
+        "join CVEs c on b.cve_id = c.cve_id where vendor_name = ? and prod_name = ? and vers_num like ?";
     var inserts = [req.params["vendor"],req.params["product"],ver];
     sql = mysql.format(sql,inserts);
+    console.log(sql);
     call(connection,sql,req,res,next);
 };
 
@@ -145,8 +151,6 @@ exports.getSmartExploits = function(req,res,next){
                     }
                 });
             });
-
-
             }
                 else
             {
