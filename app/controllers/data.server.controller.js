@@ -15,6 +15,7 @@ exports.getVendor = function(req,res,next){
     var sql = "select distinct(vendor_name) from vendor where `vendor_name` LIKE ?";
     var inserts = ["%"+req.params["likeVendorName"]+"%"];
     sql = mysql.format(sql,inserts);
+    console.log(sql);
     call(connection,sql,req,res,next);
 };
 
@@ -23,6 +24,7 @@ exports.getProductFromVendor = function(req,res,next){
     var sql = "select distinct(prod_name) from vendor where vendor_name = ?";
     var inserts = [req.params["vendor"]];
     sql = mysql.format(sql,inserts);
+    console.log(sql);
     call(connection,sql,req,res,next);
 };
 
@@ -68,6 +70,7 @@ exports.getLikeProducts = function(req,res,next){
     var sql = "select distinct(vers_num) from vendor where vendor_name = ? and prod_name = ? and `vers_num` LIKE ?";
     var inserts = [req.params["vendor"],req.params["product"],ver];
     sql = mysql.format(sql,inserts);
+    console.log(sql);
     call(connection,sql,req,res,next);
 };
 
@@ -170,5 +173,6 @@ function call(connection,query,req,res,next){
                 res.json(err);
             }
         });
+
 }
 
