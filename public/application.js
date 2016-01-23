@@ -6,6 +6,8 @@ var mainApplicationModule = angular.module('mainApplicationModule',
     [
         'ui.router',
         'header',
+        'sidebar',
+        'index',
         'tree',
         'table',
         'detail'

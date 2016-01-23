@@ -57,24 +57,8 @@ table.controller("tableController",['$rootScope','$scope', '$http','$timeout','$
                     }
                 });
 
-               /* getFocusedCell($scope,function(row){
-                    var msg = 'row selected ' + row.isSelected;
-                    console.log(msg);
-                    if(row.isSelected){
-                        $scope.selected = true;
-                        cve = row.entity.vname;
-
-                    }else{
-                        $scope.selected = false;
-                    }
-                });*/
             }
         };
-
-        /*
-         gridApi.grid.cellNav.clearFocus();
-         gridApi.grid.cellNav.lastRowCol = null;
-         */
         $scope.height = "height : "+($(window).height()-82-62-12)+"px";
 
        $scope.getDetail = function(){
