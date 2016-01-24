@@ -4,11 +4,12 @@ module.exports = function(app){
     app.get('/', function (req, res) {
         res.render('index', {});
     });
-    app.get('/test', function (req, res) {
-        res.render('test', {});
-    });
+
+    /****************************cve********************************/
+    app.get('/data/cves',data.getCVEs);
 
 
+    /*******************table and tree chart************************/
     app.get('/data/vendor/like/:likeVendorName',data.getVendor);
     app.get('/data/vendor/:vendor',data.getProductFromVendor);
     app.get('/data/vendor/:vendor/:product',data.getProductVersionNumber);

@@ -8,19 +8,26 @@ var mysql = require('mysql');
 var fs = require('fs');
 var async = require('async');
 
+/****************************CVES**************************************/
+
+exports.getCVEs = function(req,res,next){
+    var sql = "select * from CVEs limit 0,100";
+    sql = mysql.format(sql);
+    call(connection,sql,req,res,next);
+}
+
+
 /***************************For Table***********************************/
 
 exports.getVendor = function(req,res,next){
-    console.log("likeVendorName");
     var sql = "select distinct(vendor_name) from vendor where `vendor_name` LIKE ?";
     var inserts = ["%"+req.params["likeVendorName"]+"%"];
     sql = mysql.format(sql,inserts);
-    console.log(sql);
     call(connection,sql,req,res,next);
 };
 
 exports.getProductFromVendor = function(req,res,next){
-    console.log("productfromvendor");
+
     var sql = "select distinct(prod_name) from vendor where vendor_name = ?";
     var inserts = [req.params["vendor"]];
     sql = mysql.format(sql,inserts);
@@ -30,7 +37,6 @@ exports.getProductFromVendor = function(req,res,next){
 
 
 exports.getProductVersionNumber = function(req,res,next){
-    console.log("productVersionNumber");
     var sql = "select distinct(vers_num) from vendor where `vendor_name` = ? and `prod_name` = ?";
     var inserts = [req.params["vendor"],req.params["product"]];
     sql = mysql.format(sql,inserts);

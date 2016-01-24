@@ -8,6 +8,7 @@ var mainApplicationModule = angular.module('mainApplicationModule',
         'header',
         'sidebar',
         'index',
+        'cves',
         'tree',
         'table',
         'detail'
